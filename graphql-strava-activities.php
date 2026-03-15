@@ -106,6 +106,7 @@ function wpgraphql_strava_init(): void {
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/svg.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/api.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/cache.php';
+	require_once WPGRAPHQL_STRAVA_DIR . 'includes/oauth.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/admin.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/class-wpgraphql-strava-activities-list-table.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/graphql.php';

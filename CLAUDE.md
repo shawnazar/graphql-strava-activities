@@ -36,6 +36,7 @@ includes/
 ├── cache.php                  # Transient caching, photo enrichment, normalization
 ├── admin.php                  # Settings page + Getting Started + Preview + Activities
 ├── graphql.php                # StravaActivity type + stravaActivities query
+├── oauth.php                  # Strava OAuth callback handler (one-click connect)
 ├── shortcodes.php             # WordPress shortcodes for non-headless sites
 ├── updater.php                # Self-hosted update checker via GitHub Releases API
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page

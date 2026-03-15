@@ -17,6 +17,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'admin_menu', 'wpgraphql_strava_add_admin_menu' );
 add_action( 'admin_init', 'wpgraphql_strava_register_settings' );
 add_action( 'admin_init', 'wpgraphql_strava_handle_resync' );
+add_action( 'admin_init', 'wpgraphql_strava_intercept_oauth_redirect' );
+
+/**
+ * Intercept the Strava OAuth redirect on the settings page.
+ *
+ * Strava sends the user back with ?code=...&state=... in the URL.
+ * We rewrite these to our handler's expected parameter names and redirect.
+ *
+ * @return void
+ */
+function wpgraphql_strava_intercept_oauth_redirect(): void {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- state parameter is verified by the handler.
+	if ( ! isset( $_GET['page'], $_GET['code'], $_GET['state'] ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( 'wpgraphql-strava-settings' !== $_GET['page'] ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$redirect = add_query_arg(
+		[
+			'page'              => 'wpgraphql-strava-settings',
+			'strava_oauth_code' => sanitize_text_field( wp_unslash( $_GET['code'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'state'             => sanitize_text_field( wp_unslash( $_GET['state'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		],
+		admin_url( 'admin.php' )
+	);
+
+	wp_safe_redirect( $redirect );
+	exit;
+}
 
 /**
  * Add a top-level "Strava" menu page.
@@ -609,6 +646,25 @@ function wpgraphql_strava_render_admin_page(): void {
 			?>
 		</form>
 
+		<?php
+		$oauth_url = function_exists( 'wpgraphql_strava_get_oauth_url' ) ? wpgraphql_strava_get_oauth_url() : '';
+		if ( ! empty( $oauth_url ) && ! $has_token ) :
+			?>
+			<div class="card" style="max-width: 600px; padding: 16px 24px; margin: 16px 0;">
+				<h3 style="margin-top: 8px;"><?php esc_html_e( 'Connect with Strava', 'graphql-strava-activities' ); ?></h3>
+				<p><?php esc_html_e( 'Save your Client ID and Client Secret above, then click the button below to authorize. Tokens will be fetched automatically.', 'graphql-strava-activities' ); ?></p>
+				<a href="<?php echo esc_url( $oauth_url ); ?>">
+					<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
+						alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
+						style="height: 48px;" />
+				</a>
+				<p style="font-size: 13px; color: #646970; margin-top: 8px;">
+					<?php esc_html_e( 'Your Strava API application\'s "Authorization Callback Domain" must be set to:', 'graphql-strava-activities' ); ?>
+					<code><?php echo esc_html( wp_parse_url( admin_url(), PHP_URL_HOST ) ); ?></code>
+				</p>
+			</div>
+		<?php endif; ?>
+
 		<hr />
 
 		<!-- Sync section -->
@@ -716,7 +772,7 @@ function wpgraphql_strava_render_guide_page(): void {
 						<?php
 						printf(
 							/* translators: %s: Link to Strava API settings */
-							esc_html__( 'Create a Strava API application at %s', 'graphql-strava-activities' ),
+							esc_html__( 'Create a Strava API application at %s (set the Authorization Callback Domain to your site\'s domain).', 'graphql-strava-activities' ),
 							'<a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer">strava.com/settings/api</a>'
 						);
 						?>
@@ -725,12 +781,12 @@ function wpgraphql_strava_render_guide_page(): void {
 						<?php
 						printf(
 							/* translators: %s: Link to plugin settings page */
-							esc_html__( 'Enter your Client ID, Client Secret, Access Token, and Refresh Token on the %s page.', 'graphql-strava-activities' ),
+							esc_html__( 'Enter your Client ID and Client Secret on the %s page and click Save.', 'graphql-strava-activities' ),
 							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'graphql-strava-activities' ) . '</a>'
 						);
 						?>
 					</li>
-					<li><?php esc_html_e( 'Click "Resync Activities" to fetch your latest activities.', 'graphql-strava-activities' ); ?></li>
+					<li><?php esc_html_e( 'Click "Connect with Strava" to authorize — your tokens will be fetched automatically and activities synced.', 'graphql-strava-activities' ); ?></li>
 					<li><?php esc_html_e( 'Query your activities via GraphQL — see examples below.', 'graphql-strava-activities' ); ?></li>
 				</ol>
 			</div>
@@ -738,25 +794,59 @@ function wpgraphql_strava_render_guide_page(): void {
 			<!-- Getting Strava Tokens -->
 			<div class="card" style="max-width: 800px; padding: 16px 24px;">
 				<h2 style="margin-top: 8px;"><?php esc_html_e( 'Getting Your Strava Tokens', 'graphql-strava-activities' ); ?></h2>
-				<p><?php esc_html_e( 'After creating your Strava API application, you need to generate an Access Token and Refresh Token through the OAuth flow:', 'graphql-strava-activities' ); ?></p>
-				<ol style="font-size: 14px; line-height: 1.8;">
-					<li>
-						<?php esc_html_e( 'Visit the following URL in your browser (replace YOUR_CLIENT_ID):', 'graphql-strava-activities' ); ?>
-						<br />
+
+				<?php
+				$guide_oauth_url = function_exists( 'wpgraphql_strava_get_oauth_url' ) ? wpgraphql_strava_get_oauth_url() : '';
+				$guide_has_token = ! empty( wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' ) );
+
+				if ( $guide_has_token ) :
+					?>
+					<p style="color: #00a32a; font-weight: 500;">
+						<span>&#10003;</span>
+						<?php esc_html_e( 'You are connected to Strava. Tokens are stored and will refresh automatically.', 'graphql-strava-activities' ); ?>
+					</p>
+				<?php elseif ( ! empty( $guide_oauth_url ) ) : ?>
+					<p><?php esc_html_e( 'Save your Client ID and Client Secret on the Settings page, then click below to authorize:', 'graphql-strava-activities' ); ?></p>
+					<a href="<?php echo esc_url( $guide_oauth_url ); ?>">
 						<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
 							alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
 							style="height: 48px; margin: 8px 0; display: block;" />
-						<code style="display: block; padding: 8px; margin: 8px 0; background: #f0f0f1; font-size: 13px; word-break: break-all;">https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&amp;response_type=code&amp;redirect_uri=http://localhost&amp;scope=read,activity:read_all&amp;approval_prompt=force</code>
-					</li>
-					<li><?php esc_html_e( 'Authorise the app. You will be redirected to localhost with a "code" parameter in the URL.', 'graphql-strava-activities' ); ?></li>
-					<li>
-						<?php esc_html_e( 'Exchange the code for tokens using curl or any HTTP client:', 'graphql-strava-activities' ); ?>
-						<br />
-						<code style="display: block; padding: 8px; margin: 8px 0; background: #f0f0f1; font-size: 13px; word-break: break-all;">curl -X POST https://www.strava.com/oauth/token -d client_id=YOUR_CLIENT_ID -d client_secret=YOUR_CLIENT_SECRET -d code=YOUR_CODE -d grant_type=authorization_code</code>
-					</li>
-					<li><?php esc_html_e( 'The response contains your access_token, refresh_token, and expires_at. Enter them in the plugin settings.', 'graphql-strava-activities' ); ?></li>
-				</ol>
-				<p style="font-size: 13px; color: #646970;">
+					</a>
+					<p style="font-size: 13px; color: #646970;">
+						<?php esc_html_e( 'Your Strava API application\'s "Authorization Callback Domain" must be set to:', 'graphql-strava-activities' ); ?>
+						<code><?php echo esc_html( wp_parse_url( admin_url(), PHP_URL_HOST ) ); ?></code>
+					</p>
+				<?php else : ?>
+					<p>
+						<?php
+						printf(
+							/* translators: %s: Link to settings page */
+							esc_html__( 'First, enter your Client ID on the %s page.', 'graphql-strava-activities' ),
+							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'graphql-strava-activities' ) . '</a>'
+						);
+						?>
+					</p>
+				<?php endif; ?>
+
+				<details style="margin-top: 12px;">
+					<summary style="cursor: pointer; font-size: 13px; color: #646970;"><?php esc_html_e( 'Manual setup (advanced)', 'graphql-strava-activities' ); ?></summary>
+					<ol style="font-size: 14px; line-height: 1.8; margin-top: 8px;">
+						<li>
+							<?php esc_html_e( 'Visit the following URL in your browser (replace YOUR_CLIENT_ID):', 'graphql-strava-activities' ); ?>
+							<br />
+							<code style="display: block; padding: 8px; margin: 8px 0; background: #f0f0f1; font-size: 13px; word-break: break-all;">https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&amp;response_type=code&amp;redirect_uri=http://localhost&amp;scope=read,activity:read_all&amp;approval_prompt=force</code>
+						</li>
+						<li><?php esc_html_e( 'Authorise the app. You will be redirected to localhost with a "code" parameter in the URL.', 'graphql-strava-activities' ); ?></li>
+						<li>
+							<?php esc_html_e( 'Exchange the code for tokens using curl or any HTTP client:', 'graphql-strava-activities' ); ?>
+							<br />
+							<code style="display: block; padding: 8px; margin: 8px 0; background: #f0f0f1; font-size: 13px; word-break: break-all;">curl -X POST https://www.strava.com/oauth/token -d client_id=YOUR_CLIENT_ID -d client_secret=YOUR_CLIENT_SECRET -d code=YOUR_CODE -d grant_type=authorization_code</code>
+						</li>
+						<li><?php esc_html_e( 'The response contains your access_token, refresh_token, and expires_at. Enter them in the plugin settings.', 'graphql-strava-activities' ); ?></li>
+					</ol>
+				</details>
+
+				<p style="font-size: 13px; color: #646970; margin-top: 8px;">
 					<?php esc_html_e( 'The plugin automatically refreshes your access token when it expires — you only need to do this once.', 'graphql-strava-activities' ); ?>
 				</p>
 			</div>
