@@ -146,6 +146,18 @@ function wpgraphql_strava_cron_schedules( array $schedules ): array {
 			'interval' => 6 * HOUR_IN_SECONDS,
 			'display'  => __( 'Every 6 Hours', 'graphql-strava-activities' ),
 		],
+		'weekly'           => [
+			'interval' => 7 * DAY_IN_SECONDS,
+			'display'  => __( 'Once Weekly', 'graphql-strava-activities' ),
+		],
+		'every_2_weeks'    => [
+			'interval' => 14 * DAY_IN_SECONDS,
+			'display'  => __( 'Every 2 Weeks', 'graphql-strava-activities' ),
+		],
+		'monthly'          => [
+			'interval' => 30 * DAY_IN_SECONDS,
+			'display'  => __( 'Monthly', 'graphql-strava-activities' ),
+		],
 	];
 
 	return array_merge( $schedules, $custom );

@@ -213,7 +213,7 @@ function wpgraphql_strava_register_settings(): void {
 		'wpgraphql_strava_cron_schedule',
 		[
 			'type'              => 'string',
-			'sanitize_callback' => static fn( $val ) => in_array( $val, [ 'every_15_minutes', 'every_30_minutes', 'hourly', 'every_2_hours', 'every_4_hours', 'every_6_hours', 'twicedaily', 'daily' ], true ) ? $val : 'twicedaily',
+			'sanitize_callback' => static fn( $val ) => in_array( $val, [ 'every_15_minutes', 'every_30_minutes', 'hourly', 'every_2_hours', 'every_4_hours', 'every_6_hours', 'twicedaily', 'daily', 'weekly', 'every_2_weeks', 'monthly' ], true ) ? $val : 'twicedaily',
 			'default'           => 'twicedaily',
 		]
 	);
@@ -424,6 +424,9 @@ function wpgraphql_strava_render_cron_field(): void {
 		'every_6_hours'    => __( 'Every 6 Hours', 'graphql-strava-activities' ),
 		'twicedaily'       => __( 'Every 12 Hours', 'graphql-strava-activities' ),
 		'daily'            => __( 'Once Daily', 'graphql-strava-activities' ),
+		'weekly'           => __( 'Once Weekly', 'graphql-strava-activities' ),
+		'every_2_weeks'    => __( 'Every 2 Weeks', 'graphql-strava-activities' ),
+		'monthly'          => __( 'Monthly', 'graphql-strava-activities' ),
 	];
 
 	// Estimate daily API calls: ~6 per sync × syncs per day.
@@ -436,9 +439,12 @@ function wpgraphql_strava_render_cron_field(): void {
 		'every_6_hours'    => 4,
 		'twicedaily'       => 2,
 		'daily'            => 1,
+		'weekly'           => 1.0 / 7,
+		'every_2_weeks'    => 1.0 / 14,
+		'monthly'          => 1.0 / 30,
 	];
 	$syncs_per_day = $intervals[ $value ] ?? 2;
-	$daily_calls   = $syncs_per_day * 6;
+	$daily_calls   = (int) max( 1, ceil( $syncs_per_day * 6 ) );
 	?>
 	<select name="wpgraphql_strava_cron_schedule">
 		<?php foreach ( $options as $key => $label ) : ?>

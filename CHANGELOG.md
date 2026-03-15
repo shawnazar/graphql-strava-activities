@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Weekly, every 2 weeks, and monthly sync frequency options
 - "Powered by Strava" attribution in admin footer and brand attribution docs on Getting Started page
 - `poweredByStrava` GraphQL field for frontend attribution compliance
 - Strava brand-compliant orange (#FC5200) styling on admin "View on Strava" links
