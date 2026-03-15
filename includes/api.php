@@ -11,7 +11,7 @@
 declare(strict_types=1);
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**
@@ -30,57 +30,57 @@ define( 'WPGRAPHQL_STRAVA_API_BASE', 'https://www.strava.com/api/v3' );
  * @return array<int, array<string, mixed>> Activity data from Strava.
  */
 function wpgraphql_strava_fetch_activities( int $count = 200 ): array {
-    $access_token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
+	$access_token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
 
-    if ( empty( $access_token ) ) {
-        return [];
-    }
+	if ( empty( $access_token ) ) {
+		return [];
+	}
 
-    // Refresh the token if it has expired.
-    $expires_at = (int) get_option( 'wpgraphql_strava_token_expires_at', 0 );
-    if ( $expires_at > 0 && time() >= $expires_at ) {
-        $access_token = wpgraphql_strava_refresh_access_token();
-        if ( empty( $access_token ) ) {
-            return [];
-        }
-    }
+	// Refresh the token if it has expired.
+	$expires_at = (int) get_option( 'wpgraphql_strava_token_expires_at', 0 );
+	if ( $expires_at > 0 && time() >= $expires_at ) {
+		$access_token = wpgraphql_strava_refresh_access_token();
+		if ( empty( $access_token ) ) {
+			return [];
+		}
+	}
 
-    $response = wp_remote_get(
-        WPGRAPHQL_STRAVA_API_BASE . '/athlete/activities',
-        [
-            'headers' => [ 'Authorization' => 'Bearer ' . $access_token ],
-            'timeout' => 15,
-            'body'    => [
-                'per_page' => $count,
-                'page'     => 1,
-            ],
-        ]
-    );
+	$response = wp_remote_get(
+		WPGRAPHQL_STRAVA_API_BASE . '/athlete/activities',
+		[
+			'headers' => [ 'Authorization' => 'Bearer ' . $access_token ],
+			'timeout' => 15,
+			'body'    => [
+				'per_page' => $count,
+				'page'     => 1,
+			],
+		]
+	);
 
-    if ( is_wp_error( $response ) ) {
-        error_log( 'WPGraphQL Strava: API error — ' . $response->get_error_message() );
-        return [];
-    }
+	if ( is_wp_error( $response ) ) {
+		error_log( 'WPGraphQL Strava: API error — ' . $response->get_error_message() );
+		return [];
+	}
 
-    $status_code = wp_remote_retrieve_response_code( $response );
+	$status_code = wp_remote_retrieve_response_code( $response );
 
-    if ( 200 !== $status_code ) {
-        error_log( 'WPGraphQL Strava: API returned status ' . $status_code );
+	if ( 200 !== $status_code ) {
+		error_log( 'WPGraphQL Strava: API returned status ' . $status_code );
 
-        // Try refreshing the token once on 401.
-        if ( 401 === $status_code ) {
-            $new_token = wpgraphql_strava_refresh_access_token();
-            if ( ! empty( $new_token ) ) {
-                return wpgraphql_strava_fetch_activities_with_token( $new_token, $count );
-            }
-        }
+		// Try refreshing the token once on 401.
+		if ( 401 === $status_code ) {
+			$new_token = wpgraphql_strava_refresh_access_token();
+			if ( ! empty( $new_token ) ) {
+				return wpgraphql_strava_fetch_activities_with_token( $new_token, $count );
+			}
+		}
 
-        return [];
-    }
+		return [];
+	}
 
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-    return is_array( $data ) ? $data : [];
+	return is_array( $data ) ? $data : [];
 }
 
 /**
@@ -93,25 +93,25 @@ function wpgraphql_strava_fetch_activities( int $count = 200 ): array {
  * @return array<int, array<string, mixed>>
  */
 function wpgraphql_strava_fetch_activities_with_token( string $token, int $count ): array {
-    $response = wp_remote_get(
-        WPGRAPHQL_STRAVA_API_BASE . '/athlete/activities',
-        [
-            'headers' => [ 'Authorization' => 'Bearer ' . $token ],
-            'timeout' => 15,
-            'body'    => [
-                'per_page' => $count,
-                'page'     => 1,
-            ],
-        ]
-    );
+	$response = wp_remote_get(
+		WPGRAPHQL_STRAVA_API_BASE . '/athlete/activities',
+		[
+			'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+			'timeout' => 15,
+			'body'    => [
+				'per_page' => $count,
+				'page'     => 1,
+			],
+		]
+	);
 
-    if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-        return [];
-    }
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return [];
+	}
 
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-    return is_array( $data ) ? $data : [];
+	return is_array( $data ) ? $data : [];
 }
 
 /**
@@ -126,29 +126,29 @@ function wpgraphql_strava_fetch_activities_with_token( string $token, int $count
  * @return array<string, mixed> Activity detail, or empty array on failure.
  */
 function wpgraphql_strava_fetch_activity_detail( int $activity_id, string $token = '' ): array {
-    if ( empty( $token ) ) {
-        $token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
-    }
+	if ( empty( $token ) ) {
+		$token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
+	}
 
-    if ( empty( $token ) || $activity_id <= 0 ) {
-        return [];
-    }
+	if ( empty( $token ) || $activity_id <= 0 ) {
+		return [];
+	}
 
-    $response = wp_remote_get(
-        WPGRAPHQL_STRAVA_API_BASE . '/activities/' . $activity_id,
-        [
-            'headers' => [ 'Authorization' => 'Bearer ' . $token ],
-            'timeout' => 10,
-        ]
-    );
+	$response = wp_remote_get(
+		WPGRAPHQL_STRAVA_API_BASE . '/activities/' . $activity_id,
+		[
+			'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+			'timeout' => 10,
+		]
+	);
 
-    if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-        return [];
-    }
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return [];
+	}
 
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-    return is_array( $data ) ? $data : [];
+	return is_array( $data ) ? $data : [];
 }
 
 /**
@@ -159,48 +159,48 @@ function wpgraphql_strava_fetch_activity_detail( int $activity_id, string $token
  * @return string New access token, or empty string on failure.
  */
 function wpgraphql_strava_refresh_access_token(): string {
-    $client_id     = get_option( 'wpgraphql_strava_client_id', '' );
-    $client_secret = wpgraphql_strava_get_option( 'wpgraphql_strava_client_secret' );
-    $refresh_token = wpgraphql_strava_get_option( 'wpgraphql_strava_refresh_token' );
+	$client_id     = get_option( 'wpgraphql_strava_client_id', '' );
+	$client_secret = wpgraphql_strava_get_option( 'wpgraphql_strava_client_secret' );
+	$refresh_token = wpgraphql_strava_get_option( 'wpgraphql_strava_refresh_token' );
 
-    if ( empty( $client_id ) || empty( $client_secret ) || empty( $refresh_token ) ) {
-        return '';
-    }
+	if ( empty( $client_id ) || empty( $client_secret ) || empty( $refresh_token ) ) {
+		return '';
+	}
 
-    $response = wp_remote_post(
-        'https://www.strava.com/oauth/token',
-        [
-            'timeout' => 15,
-            'body'    => [
-                'client_id'     => $client_id,
-                'client_secret' => $client_secret,
-                'refresh_token' => $refresh_token,
-                'grant_type'    => 'refresh_token',
-            ],
-        ]
-    );
+	$response = wp_remote_post(
+		'https://www.strava.com/oauth/token',
+		[
+			'timeout' => 15,
+			'body'    => [
+				'client_id'     => $client_id,
+				'client_secret' => $client_secret,
+				'refresh_token' => $refresh_token,
+				'grant_type'    => 'refresh_token',
+			],
+		]
+	);
 
-    if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-        error_log( 'WPGraphQL Strava: token refresh failed.' );
-        return '';
-    }
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		error_log( 'WPGraphQL Strava: token refresh failed.' );
+		return '';
+	}
 
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-    if ( ! is_array( $data ) || empty( $data['access_token'] ) ) {
-        return '';
-    }
+	if ( ! is_array( $data ) || empty( $data['access_token'] ) ) {
+		return '';
+	}
 
-    // Persist updated tokens (encrypted at rest when key is configured).
-    wpgraphql_strava_update_option( 'wpgraphql_strava_access_token', sanitize_text_field( $data['access_token'] ) );
+	// Persist updated tokens (encrypted at rest when key is configured).
+	wpgraphql_strava_update_option( 'wpgraphql_strava_access_token', sanitize_text_field( $data['access_token'] ) );
 
-    if ( ! empty( $data['refresh_token'] ) ) {
-        wpgraphql_strava_update_option( 'wpgraphql_strava_refresh_token', sanitize_text_field( $data['refresh_token'] ) );
-    }
+	if ( ! empty( $data['refresh_token'] ) ) {
+		wpgraphql_strava_update_option( 'wpgraphql_strava_refresh_token', sanitize_text_field( $data['refresh_token'] ) );
+	}
 
-    if ( ! empty( $data['expires_at'] ) ) {
-        update_option( 'wpgraphql_strava_token_expires_at', (int) $data['expires_at'] );
-    }
+	if ( ! empty( $data['expires_at'] ) ) {
+		update_option( 'wpgraphql_strava_token_expires_at', (int) $data['expires_at'] );
+	}
 
-    return $data['access_token'];
+	return $data['access_token'];
 }

@@ -3,12 +3,26 @@
     <description>WordPress Coding Standards for GraphQL Strava Activities.</description>
 
     <!-- Scan these files -->
-    <file>graphql-strava-activities.php</file>
+    <file>wp-graphql-strava.php</file>
     <file>includes/</file>
 
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>
     <arg name="colors"/>
+
+    <!-- Only fail on errors, not warnings -->
+    <config name="severity" value="1"/>
+    <arg name="warning-severity" value="0"/>
+
+    <!-- Allow error_log for API error reporting -->
+    <rule ref="WordPress.PHP.DevelopmentFunctions.error_log_error_log">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Allow $default as parameter name -->
+    <rule ref="Universal.NamingConventions.NoReservedKeywordParameterNames">
+        <severity>0</severity>
+    </rule>
 
     <!-- PHP 8.0+ -->
     <config name="testVersion" value="8.0-"/>

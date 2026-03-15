@@ -11,7 +11,7 @@
 declare(strict_types=1);
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**
@@ -21,51 +21,51 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<int, array{0: float, 1: float}> Array of [lat, lng] pairs.
  */
 function wpgraphql_strava_decode_polyline( string $encoded ): array {
-    if ( empty( $encoded ) ) {
-        return [];
-    }
+	if ( empty( $encoded ) ) {
+		return [];
+	}
 
-    $points = [];
-    $index  = 0;
-    $len    = strlen( $encoded );
-    $lat    = 0;
-    $lng    = 0;
+	$points = [];
+	$index  = 0;
+	$len    = strlen( $encoded );
+	$lat    = 0;
+	$lng    = 0;
 
-    while ( $index < $len ) {
-        // Decode latitude.
-        $shift  = 0;
-        $result = 0;
+	while ( $index < $len ) {
+		// Decode latitude.
+		$shift  = 0;
+		$result = 0;
 
-        do {
-            if ( $index >= $len ) {
-                break 2;
-            }
-            $byte    = ord( $encoded[ $index ] ) - 63;
-            ++$index;
-            $result |= ( $byte & 0x1F ) << $shift;
-            $shift  += 5;
-        } while ( $byte >= 0x20 );
+		do {
+			if ( $index >= $len ) {
+				break 2;
+			}
+			$byte = ord( $encoded[ $index ] ) - 63;
+			++$index;
+			$result |= ( $byte & 0x1F ) << $shift;
+			$shift  += 5;
+		} while ( $byte >= 0x20 );
 
-        $lat += ( $result & 1 ) ? ~( $result >> 1 ) : ( $result >> 1 );
+		$lat += ( $result & 1 ) ? ~( $result >> 1 ) : ( $result >> 1 );
 
-        // Decode longitude.
-        $shift  = 0;
-        $result = 0;
+		// Decode longitude.
+		$shift  = 0;
+		$result = 0;
 
-        do {
-            if ( $index >= $len ) {
-                break 2;
-            }
-            $byte    = ord( $encoded[ $index ] ) - 63;
-            ++$index;
-            $result |= ( $byte & 0x1F ) << $shift;
-            $shift  += 5;
-        } while ( $byte >= 0x20 );
+		do {
+			if ( $index >= $len ) {
+				break 2;
+			}
+			$byte = ord( $encoded[ $index ] ) - 63;
+			++$index;
+			$result |= ( $byte & 0x1F ) << $shift;
+			$shift  += 5;
+		} while ( $byte >= 0x20 );
 
-        $lng += ( $result & 1 ) ? ~( $result >> 1 ) : ( $result >> 1 );
+		$lng += ( $result & 1 ) ? ~( $result >> 1 ) : ( $result >> 1 );
 
-        $points[] = [ $lat / 1e5, $lng / 1e5 ];
-    }
+		$points[] = [ $lat / 1e5, $lng / 1e5 ];
+	}
 
-    return $points;
+	return $points;
 }
