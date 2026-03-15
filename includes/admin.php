@@ -544,6 +544,16 @@ function wpgraphql_strava_render_admin_footer(): void {
 		<a href="https://github.com/shawnazar/wp-graphql-strava/issues" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Report an Issue', 'graphql-strava-activities' ); ?></a>
 		<span>&middot;</span>
 		<a href="https://github.com/shawnazar/wp-graphql-strava/discussions" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Discussions', 'graphql-strava-activities' ); ?></a>
+		<span>&middot;</span>
+		<span>
+			<?php
+			printf(
+				/* translators: %s: Strava website link */
+				esc_html__( 'Powered by %s', 'graphql-strava-activities' ),
+				'<a href="https://www.strava.com" target="_blank" rel="noopener noreferrer" style="color: #FC5200; font-weight: bold;">Strava</a>'
+			);
+			?>
+		</span>
 	</div>
 	<?php
 }
@@ -727,6 +737,9 @@ function wpgraphql_strava_render_guide_page(): void {
 					<li>
 						<?php esc_html_e( 'Visit the following URL in your browser (replace YOUR_CLIENT_ID):', 'graphql-strava-activities' ); ?>
 						<br />
+						<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
+							alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
+							style="height: 48px; margin: 8px 0; display: block;" />
 						<code style="display: block; padding: 8px; margin: 8px 0; background: #f0f0f1; font-size: 13px; word-break: break-all;">https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&amp;response_type=code&amp;redirect_uri=http://localhost&amp;scope=read,activity:read_all&amp;approval_prompt=force</code>
 					</li>
 					<li><?php esc_html_e( 'Authorise the app. You will be redirected to localhost with a "code" parameter in the URL.', 'graphql-strava-activities' ); ?></li>
@@ -938,6 +951,28 @@ function wpgraphql_strava_render_guide_page(): void {
 				</p>
 			</div>
 
+			<!-- Strava Brand Attribution -->
+			<div class="card" style="max-width: 800px; padding: 16px 24px;">
+				<h2 style="margin-top: 8px;"><?php esc_html_e( 'Strava Brand Attribution', 'graphql-strava-activities' ); ?></h2>
+				<p><?php esc_html_e( 'Per Strava brand guidelines, any frontend displaying Strava data must include the following:', 'graphql-strava-activities' ); ?></p>
+				<ol style="font-size: 14px; line-height: 1.8;">
+					<li>
+						<strong><?php esc_html_e( '"Powered by Strava" attribution', 'graphql-strava-activities' ); ?></strong>
+						— <?php esc_html_e( 'Display this text on any page that shows Strava activity data. It must not be larger or more prominent than your application name.', 'graphql-strava-activities' ); ?>
+					</li>
+					<li>
+						<strong><?php esc_html_e( '"View on Strava" link styling', 'graphql-strava-activities' ); ?></strong>
+						— <?php esc_html_e( 'Links to Strava must be bold, underlined, or use Strava orange (#FC5200) to be identifiable.', 'graphql-strava-activities' ); ?>
+					</li>
+				</ol>
+				<p style="font-size: 13px; color: #646970;">
+					<?php esc_html_e( 'The poweredByStrava field is available in the GraphQL response for convenience. This plugin handles attribution on admin pages automatically — you are responsible for your public-facing frontend.', 'graphql-strava-activities' ); ?>
+				</p>
+				<p style="font-size: 13px;">
+					<a href="https://developers.strava.com/guidelines/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Strava Brand Guidelines', 'graphql-strava-activities' ); ?> &rarr;</a>
+				</p>
+			</div>
+
 			<?php wpgraphql_strava_render_admin_footer(); ?>
 
 		</div>
@@ -1063,7 +1098,7 @@ function wpgraphql_strava_render_activity_card( array $activity, bool $is_demo =
 
 				<?php if ( ! empty( $activity['stravaUrl'] ) && ! $is_demo ) : ?>
 					<p style="margin: 16px 0 0;">
-						<a href="<?php echo esc_url( $activity['stravaUrl'] ); ?>" target="_blank" rel="noopener noreferrer" style="font-size: 13px;">
+						<a href="<?php echo esc_url( $activity['stravaUrl'] ); ?>" target="_blank" rel="noopener noreferrer" style="color: #FC5200; font-weight: bold; text-decoration: none; font-size: 13px;">
 							<?php esc_html_e( 'View on Strava', 'graphql-strava-activities' ); ?> &rarr;
 						</a>
 					</p>

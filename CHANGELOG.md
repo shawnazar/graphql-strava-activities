@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- "Powered by Strava" attribution in admin footer and brand attribution docs on Getting Started page
+- `poweredByStrava` GraphQL field for frontend attribution compliance
+- Strava brand-compliant orange (#FC5200) styling on admin "View on Strava" links
+- Official "Connect with Strava" button SVG on Getting Started page
 - PHPUnit test suite with unit and integration tests
 - Unit tests for polyline decoder, encryption, and SVG generator
 - Integration tests for cache module (duration formatting, activity processing, distance conversion)

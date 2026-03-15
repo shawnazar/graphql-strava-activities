@@ -78,7 +78,7 @@ that depend on them. The bootstrap file handles this.
 
 ## GraphQL Fields
 
-The `StravaActivity` type exposes 20 fields. All come from the Strava list endpoint
+The `StravaActivity` type exposes 21 fields. All come from the Strava list endpoint
 (no extra API calls needed):
 
 | Field | Type | Source |
@@ -103,6 +103,7 @@ The `StravaActivity` type exposes 20 fields. All come from the Strava list endpo
 | city | String | `location_city` |
 | country | String | `location_country` |
 | isPrivate | Boolean | `private` |
+| poweredByStrava | String | Static attribution text |
 
 ## Shortcodes
 

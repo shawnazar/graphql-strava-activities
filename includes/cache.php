@@ -184,7 +184,8 @@ function wpgraphql_strava_process_activities( array $raw_activities ): array {
 			'startLatlng'    => $activity['start_latlng'] ?? null,
 			'city'           => sanitize_text_field( $activity['location_city'] ?? '' ),
 			'country'        => sanitize_text_field( $activity['location_country'] ?? '' ),
-			'isPrivate'      => ! empty( $activity['private'] ),
+			'isPrivate'        => ! empty( $activity['private'] ),
+			'poweredByStrava'  => 'Powered by Strava',
 		];
 	}
 

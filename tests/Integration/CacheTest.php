@@ -220,6 +220,14 @@ class CacheTest extends TestCase {
         $this->assertSame( 'https://www.strava.com/activities/12345678901', $processed[0]['stravaUrl'] );
     }
 
+    public function test_process_activities_includes_powered_by_strava(): void {
+        $fixture   = file_get_contents( dirname( __DIR__ ) . '/fixtures/strava-api-response.json' );
+        $raw       = json_decode( $fixture, true );
+        $processed = wpgraphql_strava_process_activities( $raw );
+
+        $this->assertSame( 'Powered by Strava', $processed[0]['poweredByStrava'] );
+    }
+
     public function test_get_cached_activities_returns_empty_without_token(): void {
         $this->options['wpgraphql_strava_access_token'] = '';
 

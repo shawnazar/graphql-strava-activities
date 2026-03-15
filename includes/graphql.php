@@ -107,6 +107,10 @@ function wpgraphql_strava_register_types(): void {
 					'type'        => 'Boolean',
 					'description' => __( 'Whether this is a private activity.', 'graphql-strava-activities' ),
 				],
+				'poweredByStrava'  => [
+					'type'        => 'String',
+					'description' => __( 'Strava attribution text for brand guideline compliance.', 'graphql-strava-activities' ),
+				],
 			],
 		]
 	);
