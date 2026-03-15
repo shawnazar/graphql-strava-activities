@@ -162,6 +162,7 @@ No build step — pure PHP plugin.
 
 GrumPHP runs automatically on every commit (installed via `composer install`):
 1. **phpcs** — WordPress coding standards check on changed PHP files
-2. **phpunit** — full test suite
+2. **phpstan** — PHPStan level 5 static analysis
+3. **phpunit** — full test suite
 
-If either fails, the commit is blocked. Fix the issues and try again.
+If any task fails, the commit is blocked. Fix the issues and try again.
