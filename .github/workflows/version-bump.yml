@@ -15,10 +15,11 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  release:
-    name: Bump version and tag
+  create-release-pr:
+    name: Create release PR
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +27,11 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Calculate next version
         id: version
@@ -69,47 +69,66 @@ jobs:
             exit 1
           fi
 
+      - name: Create release branch
+        run: |
+          NEXT="${{ steps.version.outputs.next }}"
+          git checkout -b "release/${NEXT}"
+
       - name: Bump version in plugin files
         run: |
           CURRENT="${{ steps.version.outputs.current }}"
           NEXT="${{ steps.version.outputs.next }}"
 
-          # Plugin header.
           sed -i "s/Version:           ${CURRENT}/Version:           ${NEXT}/" graphql-strava-activities.php
-
-          # PHP constant.
           sed -i "s/WPGRAPHQL_STRAVA_VERSION', '${CURRENT}'/WPGRAPHQL_STRAVA_VERSION', '${NEXT}'/" graphql-strava-activities.php
-
-          # readme.txt stable tag.
           sed -i "s/Stable tag: ${CURRENT}/Stable tag: ${NEXT}/" readme.txt
 
       - name: Update changelog
         run: |
           NEXT="${{ steps.version.outputs.next }}"
           DATE=$(date +%Y-%m-%d)
-
-          # Insert new version header after [Unreleased], keep [Unreleased] empty.
           sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [${NEXT}] - ${DATE}/" CHANGELOG.md
 
-      - name: Commit and tag
+      - name: Commit and push branch
         run: |
           NEXT="${{ steps.version.outputs.next }}"
-
           git add graphql-strava-activities.php readme.txt CHANGELOG.md
           git commit -m "chore: bump version to ${NEXT}"
-          git tag "${NEXT}"
+          git push origin "release/${NEXT}"
 
-      - name: Push
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NEXT="${{ steps.version.outputs.next }}"
-          git push origin main
-          git push origin "${NEXT}"
+          CURRENT="${{ steps.version.outputs.current }}"
+
+          gh pr create \
+            --title "chore: release ${NEXT}" \
+            --body "$(cat <<EOF
+          ## Release ${NEXT}
+
+          Automated version bump: ${CURRENT} → ${NEXT} (${{ inputs.bump_type }})
+
+          ### Changes
+          $(sed -n '/^## \[Unreleased\]/,/^## \['"${NEXT}"'\]/{ /^## \[/d; /^$/d; p; }' CHANGELOG.md)
+
+          ### Checklist
+          - [ ] CI passes
+          - [ ] Changelog looks correct
+          - [ ] Ready to release
+
+          > Merging this PR will automatically create the \`${NEXT}\` tag and trigger the GitHub Release and WordPress.org deploy workflows.
+          EOF
+          )" \
+            --label "release" \
+            --head "release/${NEXT}" \
+            --base main
 
       - name: Summary
         run: |
           NEXT="${{ steps.version.outputs.next }}"
-          echo "### Release ${NEXT} 🚀" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Release PR created for ${NEXT}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version bumped: ${{ steps.version.outputs.current }} → ${NEXT}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Tag \`${NEXT}\` pushed — release and deploy workflows will run automatically" >> "$GITHUB_STEP_SUMMARY"
-          echo "- [View releases](https://github.com/${{ github.repository }}/releases)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: \`release/${NEXT}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Review and merge the PR to trigger the release" >> "$GITHUB_STEP_SUMMARY"

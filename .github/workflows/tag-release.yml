@@ -1,0 +1,66 @@
+name: Tag Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Create release tag
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract version from branch name
+        id: version
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH#release/}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Tagging version: $VERSION"
+
+      - name: Verify version matches plugin
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PLUGIN_VERSION=$(grep -oP "Version:\s+\K[0-9.]+" graphql-strava-activities.php)
+
+          if [ "$VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "::error::Branch version ($VERSION) does not match plugin header ($PLUGIN_VERSION)"
+            exit 1
+          fi
+
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Delete release branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          git push origin --delete "$BRANCH" || true
+
+      - name: Summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "### Release ${VERSION} tagged" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag \`${VERSION}\` pushed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release and deploy workflows will run automatically" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [View releases](https://github.com/${{ github.repository }}/releases)" >> "$GITHUB_STEP_SUMMARY"
