@@ -21,7 +21,7 @@ Compatible with Strava — a WordPress plugin that extends [WPGraphQL](https://w
 ## Requirements
 
 - PHP 8.2+
-- WordPress 6.0+
+- WordPress 6.0+ (tested up to 6.9)
 - [WPGraphQL](https://www.wpgraphql.com/) 2.0+ (required — plugin will not activate without it)
 
 ## Installation
