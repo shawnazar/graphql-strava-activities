@@ -19,4 +19,6 @@
 /SUPPORT.md
 /grumphp.yml
 /phpunit.xml.dist
+/phpstan.neon.dist
+/stubs/
 /tests/
