@@ -1,6 +1,6 @@
 # Activity Fields
 
-The `StravaActivity` type exposes 21 fields. All data comes from the Strava list endpoint — no extra API calls needed per activity.
+The `StravaActivity` type exposes 22 fields. All data comes from the Strava list endpoint — no extra API calls needed per activity.
 
 ## Field Reference
 
@@ -12,12 +12,13 @@ The `StravaActivity` type exposes 21 fields. All data comes from the Strava list
 | `date` | String | Start date in ISO 8601 format | `start_date` |
 | `type` | String | Activity type (Ride, Run, Walk, etc.) | `type` |
 | `unit` | String | Distance unit — "mi" or "km" | Setting |
+| `speedUnit` | String | Speed unit — "mph" or "km/h" | Setting |
 | `svgMap` | String | Inline SVG route map markup | `map.summary_polyline` |
 | `stravaUrl` | String | Link to the activity on Strava | Constructed from `id` |
 | `photoUrl` | String | Primary activity photo URL (nullable) | `photos.primary.urls` |
 | `elevationGain` | Float | Total elevation gain in metres | `total_elevation_gain` |
-| `averageSpeed` | Float | Average speed in m/s | `average_speed` |
-| `maxSpeed` | Float | Maximum speed in m/s | `max_speed` |
+| `averageSpeed` | Float | Average speed in mph or km/h (based on settings) | `average_speed` |
+| `maxSpeed` | Float | Maximum speed in mph or km/h (based on settings) | `max_speed` |
 | `averageHeartrate` | Float | Average heart rate in bpm (nullable) | `average_heartrate` |
 | `maxHeartrate` | Int | Max heart rate in bpm (nullable) | `max_heartrate` |
 | `calories` | Float | Estimated calories burned (nullable) | `kilojoules` × 0.239 |
@@ -36,14 +37,16 @@ These fields may return `null` if the data is unavailable:
 - `averageHeartrate` / `maxHeartrate` — requires a heart rate monitor
 - `calories` — only available for certain activity types
 
-## Distance Units
+## Distance & Speed Units
 
-The `distance` field is automatically converted based on the **Display Unit** setting:
+The `distance`, `averageSpeed`, and `maxSpeed` fields are automatically converted based on the **Display Unit** setting:
 
-- **Miles** (`mi`) — default
-- **Kilometres** (`km`)
+| Setting | Distance | Speed | Unit Fields |
+|---|---|---|---|
+| **Miles** (default) | miles | mph | `unit: "mi"`, `speedUnit: "mph"` |
+| **Kilometres** | km | km/h | `unit: "km"`, `speedUnit: "km/h"` |
 
-The `unit` field tells you which unit is in use, so your frontend can display the correct label.
+The `unit` and `speedUnit` fields tell your frontend which labels to display.
 
 ## Activity Types
 

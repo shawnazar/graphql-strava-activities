@@ -7,12 +7,15 @@ graphql-strava-activities.php          # Bootstrap, dependency check, cron sched
 includes/
 ├── encryption.php             # Optional AES-256-CBC credential encryption
 ├── polyline.php               # Google encoded polyline → [lat, lng] decoder
-├── svg.php                    # [lat, lng] → inline SVG route map
+├── svg.php                    # [lat, lng] → inline SVG route map + wp_kses allowlist
 ├── api.php                    # Strava API client (activities, detail, token refresh)
 ├── cache.php                  # Transient caching, photo enrichment, normalization
+├── oauth.php                  # Strava OAuth callback handler (one-click connect)
 ├── admin.php                  # Settings page + Getting Started + Preview + Activities
 ├── graphql.php                # StravaActivity type + stravaActivities query
-├── shortcodes.php             # WordPress shortcodes for non-headless sites
+├── rest-api.php               # REST API endpoint (/wp-json/wpgraphql-strava/v1/activities)
+├── shortcodes.php             # WordPress shortcodes + classic editor generator button
+├── updater.php                # Self-hosted update checker via GitHub Releases API
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 
@@ -20,15 +23,18 @@ includes/
 
 Load order matters — `encryption.php` and `polyline.php` must load before modules that depend on them. The bootstrap file (`graphql-strava-activities.php`) handles this:
 
-1. `encryption.php` — needed by api.php and admin.php for credential access
+1. `encryption.php` — needed by api.php, oauth.php, and admin.php for credential access
 2. `polyline.php` — needed by svg.php for polyline decoding
 3. `svg.php` — needed by cache.php for map generation
 4. `api.php` — needed by cache.php for Strava API calls
-5. `cache.php` — needed by graphql.php, admin.php, shortcodes.php
-6. `admin.php` — WordPress admin UI
-7. `graphql.php` — WPGraphQL type registration
-8. `shortcodes.php` — WordPress shortcodes
-9. `class-wpgraphql-strava-activities-list-table.php` — loaded by admin.php when needed
+5. `cache.php` — needed by graphql.php, admin.php, rest-api.php, shortcodes.php
+6. `oauth.php` — Strava OAuth callback handler (loaded before admin.php)
+7. `admin.php` — WordPress admin UI (test connection, resync, settings)
+8. `graphql.php` — WPGraphQL type registration (22 fields)
+9. `rest-api.php` — REST API endpoint registration
+10. `shortcodes.php` — WordPress shortcodes + editor generator button
+11. `class-wpgraphql-strava-activities-list-table.php` — loaded by admin.php when needed
+12. `updater.php` — loaded independently of WPGraphQL (always active)
 
 ## Data Flow
 
@@ -36,6 +42,7 @@ Load order matters — `encryption.php` and `polyline.php` must load before modu
 Strava API → api.php → cache.php → transient
                                        ↓
                               graphql.php (GraphQL queries)
+                              rest-api.php (REST API endpoint)
                               shortcodes.php (shortcode rendering)
                               admin.php (preview page, activities list)
 ```

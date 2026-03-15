@@ -1,6 +1,7 @@
 # GraphQL Strava Activities
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Tests](https://github.com/shawnazar/graphql-strava-activities/actions/workflows/test.yml/badge.svg)](https://github.com/shawnazar/graphql-strava-activities/actions/workflows/test.yml)
 [![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-8892BF.svg)](https://www.php.net/)
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)](https://wordpress.org/)
 [![WPGraphQL 2.0+](https://img.shields.io/badge/WPGraphQL-2.0%2B-4B32C3.svg)](https://www.wpgraphql.com/)
@@ -11,12 +12,15 @@ Compatible with Strava — a WordPress plugin that extends [WPGraphQL](https://w
 
 ## Features
 
-- **GraphQL API** — Query Strava activities with filtering by type and count
+- **GraphQL API** — Query Strava activities with filtering, pagination (`offset`), and 22 fields
+- **REST API** — `GET /wp-json/wpgraphql-strava/v1/activities` for non-GraphQL frontends
 - **SVG Route Maps** — Server-rendered inline SVG from Strava polyline data
+- **One-Click OAuth** — "Connect with Strava" button handles token exchange automatically
 - **Activity Photos** — Primary photo fetching for your activities
 - **Caching** — Transient-based with configurable TTL and sync frequency
 - **Credential Encryption** — Optional AES-256-CBC at-rest encryption
-- **Extensible** — Filters for cache TTL, SVG appearance, activity types, and more
+- **Shortcode Generator** — Classic editor button for inserting Strava shortcodes
+- **Extensible** — Filters for cache TTL, SVG appearance, activity types, sync hooks, and more
 
 ## Requirements
 
@@ -43,9 +47,9 @@ Activate in WordPress, then visit **Strava** in the admin menu.
 
 ## Quick Start
 
-1. Create a Strava API application at [strava.com/settings/api](https://www.strava.com/settings/api)
-2. Enter your credentials in **Strava → Settings**
-3. Click **Resync Activities**
+1. Create a Strava API application at [strava.com/settings/api](https://www.strava.com/settings/api) (set callback domain to your site)
+2. Enter Client ID and Secret in **Strava → Settings** and click Save
+3. Click **"Connect with Strava"** — tokens are fetched and activities synced automatically
 4. Query via GraphQL:
 
 ```graphql
@@ -57,6 +61,7 @@ Activate in WordPress, then visit **Strava** in the admin menu.
     date
     type
     unit
+    speedUnit
     svgMap
     stravaUrl
     photoUrl
@@ -88,6 +93,7 @@ All filters use the `wpgraphql_strava_` prefix:
 | `wpgraphql_strava_svg_attributes` | `[]` | Extra SVG element attributes |
 | `wpgraphql_strava_activities` | — | Filter activities before caching |
 | `wpgraphql_strava_activity_types` | `[]` (all) | Whitelist of allowed types |
+| `wpgraphql_strava_activities_to_fetch` | `200` | Max activities to sync |
 
 ```php
 // Example: only show rides and runs
