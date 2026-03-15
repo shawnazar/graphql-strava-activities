@@ -8,8 +8,119 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
+  code-scanning:
+    name: Code Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: openssl, mbstring
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: PHPCS (SARIF)
+        run: vendor/bin/phpcs --report=json --report-file=phpcs-results.json || true
+
+      - name: Convert PHPCS to SARIF
+        run: |
+          php -r '
+          $json = json_decode(file_get_contents("phpcs-results.json"), true);
+          $runs = [[
+            "tool" => ["driver" => [
+              "name" => "PHP_CodeSniffer",
+              "informationUri" => "https://github.com/PHPCSStandards/PHP_CodeSniffer",
+              "rules" => []
+            ]],
+            "results" => []
+          ]];
+          $ruleIds = [];
+          foreach ($json["files"] ?? [] as $file => $data) {
+            foreach ($data["messages"] ?? [] as $msg) {
+              $ruleId = $msg["source"] ?? "unknown";
+              if (!in_array($ruleId, $ruleIds)) {
+                $ruleIds[] = $ruleId;
+                $runs[0]["tool"]["driver"]["rules"][] = [
+                  "id" => $ruleId,
+                  "shortDescription" => ["text" => $ruleId]
+                ];
+              }
+              $runs[0]["results"][] = [
+                "ruleId" => $ruleId,
+                "level" => $msg["type"] === "ERROR" ? "error" : "warning",
+                "message" => ["text" => $msg["message"]],
+                "locations" => [[
+                  "physicalLocation" => [
+                    "artifactLocation" => ["uri" => ltrim($file, "/"), "uriBaseId" => "%SRCROOT%"],
+                    "region" => ["startLine" => $msg["line"], "startColumn" => $msg["column"]]
+                  ]
+                ]]
+              ];
+            }
+          }
+          $sarif = ["\$schema" => "https://json.schemastore.org/sarif-2.1.0.json", "version" => "2.1.0", "runs" => $runs];
+          file_put_contents("phpcs-results.sarif", json_encode($sarif, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          '
+
+      - name: Upload PHPCS SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: phpcs-results.sarif
+          category: phpcs
+
+      - name: PHPStan (SARIF)
+        run: vendor/bin/phpstan analyse --error-format=json > phpstan-results.json 2>&1 || true
+
+      - name: Convert PHPStan to SARIF
+        run: |
+          php -r '
+          $json = json_decode(file_get_contents("phpstan-results.json"), true);
+          $runs = [[
+            "tool" => ["driver" => [
+              "name" => "PHPStan",
+              "informationUri" => "https://phpstan.org",
+              "rules" => []
+            ]],
+            "results" => []
+          ]];
+          foreach ($json["files"] ?? [] as $file => $data) {
+            foreach ($data["messages"] ?? [] as $msg) {
+              $runs[0]["results"][] = [
+                "ruleId" => "phpstan",
+                "level" => "error",
+                "message" => ["text" => $msg["message"] ?? $msg],
+                "locations" => [[
+                  "physicalLocation" => [
+                    "artifactLocation" => ["uri" => ltrim($file, "/"), "uriBaseId" => "%SRCROOT%"],
+                    "region" => ["startLine" => $msg["line"] ?? 1]
+                  ]
+                ]]
+              ];
+            }
+          }
+          $sarif = ["\$schema" => "https://json.schemastore.org/sarif-2.1.0.json", "version" => "2.1.0", "runs" => $runs];
+          file_put_contents("phpstan-results.sarif", json_encode($sarif, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          '
+
+      - name: Upload PHPStan SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: phpstan-results.sarif
+          category: phpstan
+
+
   test:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
