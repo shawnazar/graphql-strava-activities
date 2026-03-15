@@ -543,11 +543,16 @@ function wpgraphql_strava_handle_resync(): void {
 			30
 		);
 	} else {
+		$has_token_for_sync = ! empty( wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' ) );
+		$error_message      = $has_token_for_sync
+			? __( 'Sync failed. The Strava API returned an error — check the token status above or try "Test Connection".', 'graphql-strava-activities' )
+			: __( 'Sync failed. No access token configured — enter your credentials or connect with Strava first.', 'graphql-strava-activities' );
+
 		set_transient(
 			'wpgraphql_strava_admin_notice',
 			[
 				'type'    => 'error',
-				'message' => __( 'Sync failed. Check your credentials and try again.', 'graphql-strava-activities' ),
+				'message' => $error_message,
 			],
 			30
 		);
@@ -555,6 +560,182 @@ function wpgraphql_strava_handle_resync(): void {
 
 	wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava-settings' ) );
 	exit;
+}
+
+add_action( 'admin_init', 'wpgraphql_strava_handle_test_connection' );
+
+/**
+ * Handle the "Test Connection" button on the settings page.
+ *
+ * Makes a lightweight API call to the /athlete endpoint to verify credentials.
+ *
+ * @return void
+ */
+function wpgraphql_strava_handle_test_connection(): void {
+	if (
+		! isset( $_POST['wpgraphql_strava_test_connection'] )
+		|| ! check_admin_referer( 'wpgraphql_strava_test_connection', 'wpgraphql_strava_test_nonce' )
+		|| ! current_user_can( 'manage_options' )
+	) {
+		return;
+	}
+
+	$access_token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
+
+	if ( empty( $access_token ) ) {
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'error',
+				'message' => __( 'No access token configured. Enter your credentials or connect with Strava first.', 'graphql-strava-activities' ),
+			],
+			30
+		);
+		wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava-settings' ) );
+		exit;
+	}
+
+	$response = wp_remote_get(
+		WPGRAPHQL_STRAVA_API_BASE . '/athlete',
+		[
+			'headers' => [ 'Authorization' => 'Bearer ' . $access_token ],
+			'timeout' => 10,
+		]
+	);
+
+	if ( is_wp_error( $response ) ) {
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'error',
+				'message' => __( 'Connection failed: ', 'graphql-strava-activities' ) . $response->get_error_message(),
+			],
+			30
+		);
+		wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava-settings' ) );
+		exit;
+	}
+
+	$status_code = wp_remote_retrieve_response_code( $response );
+	$data        = json_decode( wp_remote_retrieve_body( $response ), true );
+
+	if ( 200 === $status_code && is_array( $data ) && ! empty( $data['firstname'] ) ) {
+		$name = sanitize_text_field( $data['firstname'] );
+		if ( ! empty( $data['lastname'] ) ) {
+			$name .= ' ' . sanitize_text_field( $data['lastname'] );
+		}
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'success',
+				'message' => sprintf(
+					/* translators: %s: Strava athlete name */
+					__( 'Connected to Strava as %s.', 'graphql-strava-activities' ),
+					$name
+				),
+			],
+			30
+		);
+	} elseif ( 401 === $status_code ) {
+		// Try refreshing the token.
+		$new_token = wpgraphql_strava_refresh_access_token();
+		if ( ! empty( $new_token ) ) {
+			set_transient(
+				'wpgraphql_strava_admin_notice',
+				[
+					'type'    => 'success',
+					'message' => __( 'Token was expired but refreshed successfully. Connection is working.', 'graphql-strava-activities' ),
+				],
+				30
+			);
+		} else {
+			set_transient(
+				'wpgraphql_strava_admin_notice',
+				[
+					'type'    => 'error',
+					'message' => __( 'Access token expired and refresh failed. Please re-authorize with Strava.', 'graphql-strava-activities' ),
+				],
+				30
+			);
+		}
+	} elseif ( 429 === $status_code ) {
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'error',
+				'message' => __( 'Strava API rate limit reached. Please wait 15 minutes and try again.', 'graphql-strava-activities' ),
+			],
+			30
+		);
+	} else {
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'error',
+				'message' => sprintf(
+					/* translators: %d: HTTP status code */
+					__( 'Connection failed with HTTP status %d. Check your credentials.', 'graphql-strava-activities' ),
+					$status_code
+				),
+			],
+			30
+		);
+	}
+
+	wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava-settings' ) );
+	exit;
+}
+
+// Token health notice — warn on all admin pages when credentials are missing or expired.
+add_action( 'admin_notices', 'wpgraphql_strava_token_health_notice' );
+
+/**
+ * Display an admin notice when the Strava connection needs attention.
+ *
+ * Only shown on the plugin's admin pages to avoid cluttering the dashboard.
+ *
+ * @return void
+ */
+function wpgraphql_strava_token_health_notice(): void {
+	// Only show on our plugin pages.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+	if ( ! str_starts_with( $page, 'wpgraphql-strava' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$client_id    = get_option( 'wpgraphql_strava_client_id', '' );
+	$access_token = wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' );
+
+	// No credentials at all — likely first-time user.
+	if ( empty( $client_id ) ) {
+		return;
+	}
+
+	// Has Client ID but no token — needs to connect.
+	if ( empty( $access_token ) ) {
+		$settings_url = admin_url( 'admin.php?page=wpgraphql-strava-settings' );
+		printf(
+			'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Strava is not connected. Click "Connect with Strava" on the Settings page to authorize.', 'graphql-strava-activities' ),
+			esc_url( $settings_url ),
+			esc_html__( 'Go to Settings', 'graphql-strava-activities' )
+		);
+		return;
+	}
+
+	// Token expired and refresh might have failed.
+	$expires_at = (int) get_option( 'wpgraphql_strava_token_expires_at', 0 );
+	if ( $expires_at > 0 && $expires_at <= time() ) {
+		printf(
+			'<div class="notice notice-warning"><p>%s</p></div>',
+			esc_html__( 'Your Strava access token has expired. The plugin will attempt to refresh it on the next sync.', 'graphql-strava-activities' )
+		);
+	}
 }
 
 // ------------------------------------------------------------------
@@ -622,6 +803,7 @@ function wpgraphql_strava_render_admin_page(): void {
 	}
 
 	$has_token         = ! empty( wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' ) );
+	$token_expires_at  = (int) get_option( 'wpgraphql_strava_token_expires_at', 0 );
 	$last_sync         = (int) get_option( 'wpgraphql_strava_last_sync', 0 );
 	$cached_activities = get_transient( WPGRAPHQL_STRAVA_CACHE_KEY );
 	$cached_count      = is_array( $cached_activities ) ? count( $cached_activities ) : 0;
@@ -645,6 +827,67 @@ function wpgraphql_strava_render_admin_page(): void {
 			submit_button( __( 'Save Settings', 'graphql-strava-activities' ) );
 			?>
 		</form>
+
+		<!-- Connection Status -->
+		<div class="card" style="max-width: 600px; padding: 16px 24px; margin: 16px 0;">
+			<h3 style="margin-top: 8px;"><?php esc_html_e( 'Connection Status', 'graphql-strava-activities' ); ?></h3>
+			<table class="form-table" role="presentation" style="margin: 0;">
+				<tr>
+					<th scope="row" style="padding: 8px 10px 8px 0;"><?php esc_html_e( 'Status', 'graphql-strava-activities' ); ?></th>
+					<td style="padding: 8px 0;">
+						<?php if ( $has_token ) : ?>
+							<span style="color: #00a32a; font-weight: 500;">&#10003; <?php esc_html_e( 'Connected', 'graphql-strava-activities' ); ?></span>
+						<?php else : ?>
+							<span style="color: #d63638; font-weight: 500;">&#10007; <?php esc_html_e( 'Not connected', 'graphql-strava-activities' ); ?></span>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<?php if ( $has_token && $token_expires_at > 0 ) : ?>
+					<tr>
+						<th scope="row" style="padding: 8px 10px 8px 0;"><?php esc_html_e( 'Token Expires', 'graphql-strava-activities' ); ?></th>
+						<td style="padding: 8px 0;">
+							<?php
+							$now         = time();
+							$days_left   = (int) ceil( ( $token_expires_at - $now ) / DAY_IN_SECONDS );
+							$expiry_date = wp_date( 'F j, Y \a\t g:i A', $token_expires_at );
+
+							if ( $token_expires_at <= $now ) :
+								?>
+								<span style="color: #d63638; font-weight: 500;">
+									<?php esc_html_e( 'Expired', 'graphql-strava-activities' ); ?>
+								</span>
+								<span style="color: #646970; font-size: 13px;">
+									— <?php esc_html_e( 'will auto-refresh on next sync', 'graphql-strava-activities' ); ?>
+								</span>
+							<?php elseif ( $days_left <= 7 ) : ?>
+								<span style="color: #dba617; font-weight: 500;">
+									<?php echo esc_html( $expiry_date ); ?>
+								</span>
+								<span style="color: #646970; font-size: 13px;">
+									<?php
+									printf(
+										/* translators: %d: Number of days until token expires */
+										'(' . esc_html( _n( '%d day left', '%d days left', $days_left, 'graphql-strava-activities' ) ) . ')',
+										esc_html( (string) $days_left )
+									);
+									?>
+								</span>
+							<?php else : ?>
+								<?php echo esc_html( $expiry_date ); ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+				<?php endif; ?>
+			</table>
+
+			<?php if ( $has_token ) : ?>
+				<form method="post" style="margin-top: 8px;">
+					<?php wp_nonce_field( 'wpgraphql_strava_test_connection', 'wpgraphql_strava_test_nonce' ); ?>
+					<input type="hidden" name="wpgraphql_strava_test_connection" value="1" />
+					<?php submit_button( __( 'Test Connection', 'graphql-strava-activities' ), 'secondary', 'submit', false ); ?>
+				</form>
+			<?php endif; ?>
+		</div>
 
 		<?php
 		$oauth_url = function_exists( 'wpgraphql_strava_get_oauth_url' ) ? wpgraphql_strava_get_oauth_url() : '';

@@ -65,7 +65,8 @@ function wpgraphql_strava_fetch_activities( int $count = 200 ): array {
 	$status_code = wp_remote_retrieve_response_code( $response );
 
 	if ( 200 !== $status_code ) {
-		wp_trigger_error( __FUNCTION__, 'WPGraphQL Strava: API returned status ' . $status_code );
+		$error_context = wpgraphql_strava_describe_api_error( $status_code );
+		wp_trigger_error( __FUNCTION__, 'WPGraphQL Strava: ' . $error_context );
 
 		// Try refreshing the token once on 401.
 		if ( 401 === $status_code ) {
@@ -203,4 +204,28 @@ function wpgraphql_strava_refresh_access_token(): string {
 	}
 
 	return $data['access_token'];
+}
+
+/**
+ * Return a human-readable description for a Strava API HTTP status code.
+ *
+ * @param int $status_code HTTP status code.
+ * @return string Description.
+ */
+function wpgraphql_strava_describe_api_error( int $status_code ): string {
+	switch ( $status_code ) {
+		case 401:
+			return 'Unauthorized (401) — access token is invalid or expired.';
+		case 403:
+			return 'Forbidden (403) — insufficient permissions. Check your OAuth scopes.';
+		case 404:
+			return 'Not Found (404) — the requested resource does not exist.';
+		case 429:
+			return 'Rate Limited (429) — too many requests. Strava allows 100 requests per 15 minutes.';
+		default:
+			if ( $status_code >= 500 ) {
+				return 'Server Error (' . $status_code . ') — Strava is experiencing issues. Try again later.';
+			}
+			return 'Unexpected status ' . $status_code . '.';
+	}
 }

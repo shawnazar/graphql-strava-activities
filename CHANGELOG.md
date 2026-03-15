@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - One-click "Connect with Strava" OAuth flow — eliminates manual curl token exchange
 - OAuth callback handler with CSRF protection via state nonce
 - Automatic first sync after successful OAuth authorization
+- "Test Connection" button on Settings page — verifies credentials and shows athlete name
+- Connection Status card on Settings page with token expiry date and status indicator
+- Token health admin notice on plugin pages when credentials are missing or expired
+- Specific API error descriptions (401, 403, 429, 5xx) replacing generic "API returned status" messages
 
 ## [1.0.3] - 2026-03-15
 
