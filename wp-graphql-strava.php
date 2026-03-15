@@ -12,7 +12,6 @@
  * License:           MIT
  * License URI:       https://opensource.org/licenses/MIT
  * Text Domain:       graphql-strava-activities
- * Domain Path:       /languages
  *
  * @package WPGraphQL\Strava
  */
