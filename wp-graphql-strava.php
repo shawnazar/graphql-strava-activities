@@ -109,6 +109,7 @@ function wpgraphql_strava_init(): void {
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/cache.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/admin.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/graphql.php';
+	require_once WPGRAPHQL_STRAVA_DIR . 'includes/shortcodes.php';
 }
 
 add_action( 'plugins_loaded', 'wpgraphql_strava_init' );
