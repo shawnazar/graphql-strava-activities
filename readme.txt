@@ -33,21 +33,19 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
 
 **Example GraphQL Query:**
 
-`
-{
-  stravaActivities(first: 10, type: "Ride") {
-    title
-    distance
-    duration
-    date
-    svgMap
-    stravaUrl
-    photoUrl
-    type
-    unit
-  }
-}
-`
+    {
+      stravaActivities(first: 10, type: "Ride") {
+        title
+        distance
+        duration
+        date
+        svgMap
+        stravaUrl
+        photoUrl
+        type
+        unit
+      }
+    }
 
 == Third-Party Service ==
 
