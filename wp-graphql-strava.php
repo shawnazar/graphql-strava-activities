@@ -202,6 +202,7 @@ function wpgraphql_strava_flush_on_route_toggle( $old_value, $new_value ): void 
 }
 
 add_action( 'update_option_wpgraphql_strava_include_no_route', 'wpgraphql_strava_flush_on_route_toggle', 10, 2 );
+add_action( 'update_option_wpgraphql_strava_include_private', 'wpgraphql_strava_flush_on_route_toggle', 10, 2 );
 
 /**
  * On deactivation: clear the cron event and flush cache.

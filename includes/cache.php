@@ -126,6 +126,13 @@ function wpgraphql_strava_process_activities( array $raw_activities ): array {
 			continue;
 		}
 
+		// Skip private activities unless the toggle is on.
+		$is_private      = ! empty( $activity['private'] );
+		$include_private = (bool) get_option( 'wpgraphql_strava_include_private', false );
+		if ( $is_private && ! $include_private ) {
+			continue;
+		}
+
 		// Filter by activity type when a whitelist is set.
 		$type = $activity['type'] ?? 'Workout';
 		if ( ! empty( $allowed_types ) && ! in_array( $type, $allowed_types, true ) ) {

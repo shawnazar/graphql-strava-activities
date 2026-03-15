@@ -252,6 +252,24 @@ function wpgraphql_strava_register_settings(): void {
 		'wpgraphql-strava-settings',
 		'wpgraphql_strava_display'
 	);
+
+	register_setting(
+		'wpgraphql_strava_settings',
+		'wpgraphql_strava_include_private',
+		[
+			'type'              => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'default'           => false,
+		]
+	);
+
+	add_settings_field(
+		'wpgraphql_strava_include_private',
+		__( 'Private Activities', 'graphql-strava-activities' ),
+		'wpgraphql_strava_render_private_field',
+		'wpgraphql-strava-settings',
+		'wpgraphql_strava_display'
+	);
 }
 
 // ------------------------------------------------------------------
@@ -359,6 +377,24 @@ function wpgraphql_strava_render_no_route_field(): void {
 	</label>
 	<p class="description">
 		<?php esc_html_e( 'When enabled, activities without GPS routes will appear with an empty svgMap field. Changing this setting triggers a forced resync.', 'graphql-strava-activities' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "include private activities" checkbox.
+ *
+ * @return void
+ */
+function wpgraphql_strava_render_private_field(): void {
+	$value = (bool) get_option( 'wpgraphql_strava_include_private', false );
+	?>
+	<label>
+		<input type="checkbox" name="wpgraphql_strava_include_private" value="1" <?php checked( $value ); ?> />
+		<?php esc_html_e( 'Include private activities in GraphQL results', 'graphql-strava-activities' ); ?>
+	</label>
+	<p class="description" style="color: #d63638;">
+		<?php esc_html_e( 'Warning: If your GraphQL endpoint is publicly accessible, enabling this will expose your private Strava activities. Changing this setting triggers a forced resync.', 'graphql-strava-activities' ); ?>
 	</p>
 	<?php
 }
