@@ -149,6 +149,26 @@ function wpgraphql_strava_reschedule_cron( $old_value, $new_value ): void {
 add_action( 'update_option_wpgraphql_strava_cron_schedule', 'wpgraphql_strava_reschedule_cron', 10, 2 );
 
 /**
+ * Force a cache refresh when the "include no route" toggle changes.
+ *
+ * The cached activities were built with the previous setting, so they
+ * must be rebuilt to include or exclude GPS-less activities.
+ *
+ * @param mixed $old_value Previous value.
+ * @param mixed $new_value New value.
+ * @return void
+ */
+function wpgraphql_strava_flush_on_route_toggle( $old_value, $new_value ): void {
+	if ( $old_value === $new_value ) {
+		return;
+	}
+
+	delete_transient( 'wpgraphql_strava_activities' );
+}
+
+add_action( 'update_option_wpgraphql_strava_include_no_route', 'wpgraphql_strava_flush_on_route_toggle', 10, 2 );
+
+/**
  * On deactivation: clear the cron event and flush cache.
  *
  * @return void

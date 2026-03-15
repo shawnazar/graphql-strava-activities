@@ -249,7 +249,7 @@ function wpgraphql_strava_register_settings(): void {
 		'wpgraphql_strava_include_no_route',
 		__( 'Activities Without Routes', 'graphql-strava-activities' ),
 		'wpgraphql_strava_render_no_route_field',
-		'wpgraphql-strava',
+		'wpgraphql-strava-settings',
 		'wpgraphql_strava_display'
 	);
 }
@@ -358,7 +358,7 @@ function wpgraphql_strava_render_no_route_field(): void {
 		<?php esc_html_e( 'Include indoor and GPS-less activities (yoga, weight training, treadmill, etc.)', 'graphql-strava-activities' ); ?>
 	</label>
 	<p class="description">
-		<?php esc_html_e( 'When enabled, activities without GPS routes will appear with an empty svgMap field.', 'graphql-strava-activities' ); ?>
+		<?php esc_html_e( 'When enabled, activities without GPS routes will appear with an empty svgMap field. Changing this setting triggers a forced resync.', 'graphql-strava-activities' ); ?>
 	</p>
 	<?php
 }
