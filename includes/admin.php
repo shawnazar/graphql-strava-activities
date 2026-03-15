@@ -622,6 +622,29 @@ function wpgraphql_strava_render_admin_page(): void {
 		<p class="description" style="margin-top: 8px;">
 			<?php esc_html_e( 'Each sync: 1 list call + up to 5 detail calls for photos, with a 200 ms delay between detail calls. Manual resyncs count toward the same limits.', 'graphql-strava-activities' ); ?>
 		</p>
+
+		<hr />
+
+		<!-- Plugin Info -->
+		<div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #646970; margin-top: 8px;">
+			<span>
+				<?php
+				printf(
+					/* translators: %s: Author website link */
+					esc_html__( 'Built by %s', 'graphql-strava-activities' ),
+					'<a href="https://shawnazar.me" target="_blank" rel="noopener noreferrer">Shawn Azar</a>'
+				);
+				?>
+			</span>
+			<span>&middot;</span>
+			<a href="https://www.buymeacoffee.com/shawnazar" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Buy Me a Coffee', 'graphql-strava-activities' ); ?></a>
+			<span>&middot;</span>
+			<a href="https://github.com/shawnazar/wp-graphql-strava" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'GitHub', 'graphql-strava-activities' ); ?></a>
+			<span>&middot;</span>
+			<a href="https://github.com/shawnazar/wp-graphql-strava/issues" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Report an Issue', 'graphql-strava-activities' ); ?></a>
+			<span>&middot;</span>
+			<a href="https://github.com/shawnazar/wp-graphql-strava/discussions" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Discussions', 'graphql-strava-activities' ); ?></a>
+		</div>
 	</div>
 	<?php
 }
