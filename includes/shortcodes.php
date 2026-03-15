@@ -268,3 +268,139 @@ function wpgraphql_strava_shortcode_latest( $atts ): string {
 
 	return wpgraphql_strava_render_shortcode_card( $activities[0] );
 }
+
+// ------------------------------------------------------------------
+// Shortcode generator button for the classic editor.
+// ------------------------------------------------------------------
+
+add_action( 'media_buttons', 'wpgraphql_strava_add_shortcode_button' );
+add_action( 'admin_footer', 'wpgraphql_strava_shortcode_modal' );
+
+/**
+ * Add a "Strava" button next to "Add Media".
+ *
+ * @return void
+ */
+function wpgraphql_strava_add_shortcode_button(): void {
+	$screen = get_current_screen();
+	if ( null === $screen || ! in_array( $screen->base, [ 'post', 'page' ], true ) ) {
+		return;
+	}
+
+	printf(
+		'<button type="button" class="button" id="wpgraphql-strava-shortcode-btn" title="%1$s" style="padding-left:6px;">
+			<span class="dashicons dashicons-chart-line" style="margin-top:3px;"></span> %1$s
+		</button>',
+		esc_attr__( 'Strava', 'graphql-strava-activities' )
+	);
+}
+
+/**
+ * Render the shortcode generator modal (Thickbox).
+ *
+ * @return void
+ */
+function wpgraphql_strava_shortcode_modal(): void {
+	$screen = get_current_screen();
+	if ( null === $screen || ! in_array( $screen->base, [ 'post', 'page' ], true ) ) {
+		return;
+	}
+	?>
+	<div id="wpgraphql-strava-shortcode-modal" style="display:none;">
+		<div style="padding:16px;">
+			<h2 style="margin-top:0;"><?php esc_html_e( 'Insert Strava Shortcode', 'graphql-strava-activities' ); ?></h2>
+
+			<p>
+				<label for="wpgraphql-strava-sc-type"><strong><?php esc_html_e( 'Shortcode', 'graphql-strava-activities' ); ?></strong></label><br />
+				<select id="wpgraphql-strava-sc-type" style="width:100%;">
+					<option value="strava_activities"><?php esc_html_e( '[strava_activities] — Activity list', 'graphql-strava-activities' ); ?></option>
+					<option value="strava_activity"><?php esc_html_e( '[strava_activity] — Single activity', 'graphql-strava-activities' ); ?></option>
+					<option value="strava_map"><?php esc_html_e( '[strava_map] — Route map only', 'graphql-strava-activities' ); ?></option>
+					<option value="strava_stats"><?php esc_html_e( '[strava_stats] — Aggregate stats', 'graphql-strava-activities' ); ?></option>
+					<option value="strava_latest"><?php esc_html_e( '[strava_latest] — Most recent activity', 'graphql-strava-activities' ); ?></option>
+				</select>
+			</p>
+
+			<div id="wpgraphql-strava-sc-opts">
+				<p class="wpgraphql-strava-opt" data-for="strava_activities strava_latest">
+					<label for="wpgraphql-strava-sc-act-type"><strong><?php esc_html_e( 'Activity Type (optional)', 'graphql-strava-activities' ); ?></strong></label><br />
+					<input type="text" id="wpgraphql-strava-sc-act-type" placeholder="<?php esc_attr_e( 'e.g. Ride, Run, Walk', 'graphql-strava-activities' ); ?>" style="width:100%;" />
+				</p>
+				<p class="wpgraphql-strava-opt" data-for="strava_activities">
+					<label for="wpgraphql-strava-sc-count"><strong><?php esc_html_e( 'Count', 'graphql-strava-activities' ); ?></strong></label><br />
+					<input type="number" id="wpgraphql-strava-sc-count" value="10" min="1" max="200" style="width:100%;" />
+				</p>
+				<p class="wpgraphql-strava-opt" data-for="strava_activity strava_map">
+					<label for="wpgraphql-strava-sc-index"><strong><?php esc_html_e( 'Activity Index (0-based)', 'graphql-strava-activities' ); ?></strong></label><br />
+					<input type="number" id="wpgraphql-strava-sc-index" value="0" min="0" style="width:100%;" />
+				</p>
+			</div>
+
+			<p style="margin-top:16px;">
+				<label><strong><?php esc_html_e( 'Preview', 'graphql-strava-activities' ); ?></strong></label><br />
+				<code id="wpgraphql-strava-sc-preview" style="display:block;padding:8px;background:#f0f0f1;">[strava_activities count="10"]</code>
+			</p>
+
+			<p style="text-align:right;margin-top:16px;">
+				<button type="button" class="button button-primary" id="wpgraphql-strava-sc-insert">
+					<?php esc_html_e( 'Insert Shortcode', 'graphql-strava-activities' ); ?>
+				</button>
+			</p>
+		</div>
+	</div>
+
+	<script>
+	(function() {
+		var btn   = document.getElementById( 'wpgraphql-strava-shortcode-btn' );
+		if ( ! btn ) return;
+
+		btn.addEventListener( 'click', function( e ) {
+			e.preventDefault();
+			tb_show( '<?php echo esc_js( __( 'Insert Strava Shortcode', 'graphql-strava-activities' ) ); ?>', '#TB_inline?inlineId=wpgraphql-strava-shortcode-modal&width=420&height=380' );
+			updatePreview();
+		} );
+
+		var scType  = document.getElementById( 'wpgraphql-strava-sc-type' );
+		var actType = document.getElementById( 'wpgraphql-strava-sc-act-type' );
+		var count   = document.getElementById( 'wpgraphql-strava-sc-count' );
+		var index   = document.getElementById( 'wpgraphql-strava-sc-index' );
+		var preview = document.getElementById( 'wpgraphql-strava-sc-preview' );
+
+		function showHideOpts() {
+			var val = scType.value;
+			document.querySelectorAll( '.wpgraphql-strava-opt' ).forEach( function( el ) {
+				el.style.display = el.getAttribute( 'data-for' ).indexOf( val ) !== -1 ? '' : 'none';
+			} );
+		}
+
+		function updatePreview() {
+			showHideOpts();
+			var tag   = scType.value;
+			var attrs = [];
+
+			if ( ( tag === 'strava_activities' ) && count.value && count.value !== '10' ) {
+				attrs.push( 'count="' + count.value + '"' );
+			}
+			if ( ( tag === 'strava_activities' || tag === 'strava_latest' ) && actType.value ) {
+				attrs.push( 'type="' + actType.value + '"' );
+			}
+			if ( ( tag === 'strava_activity' || tag === 'strava_map' ) && index.value && index.value !== '0' ) {
+				attrs.push( 'index="' + index.value + '"' );
+			}
+
+			preview.textContent = '[' + tag + ( attrs.length ? ' ' + attrs.join( ' ' ) : '' ) + ']';
+		}
+
+		scType.addEventListener( 'change', updatePreview );
+		actType.addEventListener( 'input', updatePreview );
+		count.addEventListener( 'input', updatePreview );
+		index.addEventListener( 'input', updatePreview );
+
+		document.getElementById( 'wpgraphql-strava-sc-insert' ).addEventListener( 'click', function() {
+			window.send_to_editor( preview.textContent );
+			tb_remove();
+		} );
+	})();
+	</script>
+	<?php
+}

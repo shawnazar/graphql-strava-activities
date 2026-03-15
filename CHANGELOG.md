@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SVG route thumbnails in admin Activities list table (replaces checkmarks)
 - Plugin Check (PCP) job in CI workflow
 - GitHub topics for repository discoverability
+- Shortcode generator button in the classic editor ("Strava" button next to "Add Media")
 
 ## [1.0.3] - 2026-03-15
 
