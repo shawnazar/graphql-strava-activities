@@ -15,7 +15,16 @@
   "require-dev": {
     "wp-coding-standards/wpcs": "^3.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^2.0",
+    "wp-phpunit/wp-phpunit": "^6.0",
+    "brain/monkey": "^2.6"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "GraphQLStrava\\Tests\\": "tests/"
+    }
   },
   "config": {
     "allow-plugins": {
@@ -24,6 +33,9 @@
   },
   "scripts": {
     "lint": "phpcs",
-    "lint:fix": "phpcbf"
+    "lint:fix": "phpcbf",
+    "test": "phpunit",
+    "test:unit": "phpunit --testsuite unit",
+    "test:integration": "phpunit --testsuite integration"
   }
 }

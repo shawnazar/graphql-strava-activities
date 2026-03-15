@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- PHPUnit test suite with unit and integration tests
+- Unit tests for polyline decoder, encryption, and SVG generator
+- Integration tests for cache module (duration formatting, activity processing, distance conversion)
+- GitHub Actions CI workflow — PHP 8.0-8.3 matrix with lint + test on every push/PR
+- `composer test`, `composer test:unit`, `composer test:integration` scripts
+- Sample Strava API response fixture for test mocking
+
 ## [1.0.0] - 2026-03-15
 
 ### Added

@@ -1,0 +1,49 @@
+[
+  {
+    "id": 12345678901,
+    "name": "Morning Run — Wash Park Loop",
+    "distance": 8241.5,
+    "moving_time": 2520,
+    "type": "Run",
+    "start_date": "2026-03-13T07:30:00Z",
+    "map": {
+      "summary_polyline": "o~l~Fv}naSqAmBwCcA{BjA_CxBoAvC"
+    },
+    "photos": {
+      "primary": {
+        "urls": {
+          "100": "https://example.com/photo-100.jpg",
+          "600": "https://example.com/photo-600.jpg"
+        }
+      }
+    }
+  },
+  {
+    "id": 12345678902,
+    "name": "Lunch Ride — Cherry Creek Trail",
+    "distance": 29660.0,
+    "moving_time": 3900,
+    "type": "Ride",
+    "start_date": "2026-03-12T12:00:00Z",
+    "map": {
+      "summary_polyline": "kel~FhwoaSsEqHwIaFoLbCaJrGoFvKcBxI"
+    },
+    "photos": {
+      "primary": null
+    }
+  },
+  {
+    "id": 12345678903,
+    "name": "Yoga Session",
+    "distance": 0,
+    "moving_time": 3600,
+    "type": "Yoga",
+    "start_date": "2026-03-11T09:00:00Z",
+    "map": {
+      "summary_polyline": ""
+    },
+    "photos": {
+      "primary": null
+    }
+  }
+]

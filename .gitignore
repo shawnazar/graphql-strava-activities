@@ -22,3 +22,7 @@ composer.lock
 
 # Build artifacts
 *.zip
+
+# Test artifacts
+.phpunit.result.cache
+phpunit.xml
