@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI workflow — PHP 8.0-8.3 matrix with lint + test on every push/PR
 - `composer test`, `composer test:unit`, `composer test:integration` scripts
 - GrumPHP pre-commit hooks — lint and tests run automatically on every commit
+- SUPPORT.md with help channels and in-plugin docs reference
+- GitHub Release automation — creates release with zip on tag push
+- Repo topics, discussion categories, required PR approvals
 - Sample Strava API response fixture for test mocking
 
 ## [1.0.0] - 2026-03-15

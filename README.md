@@ -1,9 +1,10 @@
 # GraphQL Strava Activities
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-8892BF.svg)](https://www.php.net/)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-8892BF.svg)](https://www.php.net/)
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)](https://wordpress.org/)
 [![WPGraphQL 2.0+](https://img.shields.io/badge/WPGraphQL-2.0%2B-4B32C3.svg)](https://www.wpgraphql.com/)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange.svg)](https://www.buymeacoffee.com/shawnazar)
 
 A WordPress plugin that extends [WPGraphQL](https://www.wpgraphql.com/) with Strava activity data, server-side SVG route maps, and activity photos — no JavaScript map libraries required.
 
@@ -18,7 +19,7 @@ A WordPress plugin that extends [WPGraphQL](https://www.wpgraphql.com/) with Str
 
 ## Requirements
 
-- PHP 8.0+
+- PHP 8.2+
 - WordPress 6.0+
 - [WPGraphQL](https://www.wpgraphql.com/) 2.0+ (required — plugin will not activate without it)
 

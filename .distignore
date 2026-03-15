@@ -16,3 +16,7 @@
 /CODE_OF_CONDUCT.md
 /SECURITY.md
 /README.md
+/SUPPORT.md
+/grumphp.yml
+/phpunit.xml.dist
+/tests/
