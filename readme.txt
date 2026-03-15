@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.2
 Requires Plugins: wp-graphql
-Stable tag: 1.0.4
+Stable tag: 0.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -120,37 +120,30 @@ Yes. Any frontend that can query WPGraphQL (Next.js, Gatsby, Astro, etc.) will w
 
 == Changelog ==
 
-= 1.0.2 =
-* Added: Self-hosted update checker — manually-installed copies receive update notifications via GitHub Releases.
-* Added: Nonce verification on Activities list table filter form.
-* Added: wp_kses SVG escaping with explicit tag allowlist replacing phpcs:ignore comments.
-* Added: 30 new integration tests (65 total) for API client, GraphQL schema, and shortcodes.
-* Added: Placeholder banner and icon SVG assets for WordPress.org.
-* Added: Whitelisted sort parameters in list table to prevent arbitrary key access.
-
-= 1.0.1 =
-* Fixed: Replaced error_log() with wp_trigger_error() for production use.
-* Fixed: Renamed GRAPHQL_STRAVA_ENCRYPTION_KEY to WPGRAPHQL_STRAVA_ENCRYPTION_KEY for prefix consistency.
-* Fixed: Replaced strip_tags() with wp_strip_all_tags() in test mocks.
-* Fixed: Updated "Tested up to" to WordPress 6.9.
-
-= 1.0.0 =
-* Initial release.
-* GraphQL schema with StravaActivity type and stravaActivities query.
+= 0.1.0 =
+* Initial public release.
+* GraphQL API — StravaActivity type with 22 fields, stravaActivities query with first/offset/type arguments.
+* REST API — GET /wp-json/wpgraphql-strava/v1/activities endpoint.
 * Server-side SVG route map generation from encoded polylines.
-* Strava API client with OAuth token refresh.
-* Transient caching with configurable TTL.
-* Admin settings page for credentials, SVG customization, display options, and sync.
-* Activity photo fetching.
-* Extensible via WordPress filters and hooks.
+* One-click "Connect with Strava" OAuth flow with automatic token exchange.
+* Strava API client with automatic OAuth token refresh.
+* Transient caching with configurable TTL and 11 sync frequency options.
+* Admin settings page with credential management, SVG customization, and sync controls.
+* Connection status card with token expiry monitoring and Test Connection button.
+* Token health admin notices for expired or missing credentials.
+* Activity photo fetching and enrichment.
+* Shortcode generator button in the classic editor.
+* Five WordPress shortcodes for non-headless sites.
+* Optional AES-256-CBC at-rest credential encryption.
+* Self-hosted update checker via GitHub Releases API.
+* wp_kses SVG escaping with explicit tag allowlist.
+* Pre/post sync action hooks for extensibility.
+* Speed fields converted to mph/km/h matching distance unit setting.
+* 65 automated tests across 7 test files.
+* CI pipeline with PHPCS, PHPStan, Plugin Check, security scanning, and SARIF code scanning.
+* Automated release workflow with version bump and changelog management.
 
 == Upgrade Notice ==
 
-= 1.0.2 =
-Adds automatic update notifications for GitHub-installed copies. Security and test improvements.
-
-= 1.0.1 =
-Breaking: If you use credential encryption, rename GRAPHQL_STRAVA_ENCRYPTION_KEY to WPGRAPHQL_STRAVA_ENCRYPTION_KEY in wp-config.php.
-
-= 1.0.0 =
-Initial release.
+= 0.1.0 =
+Initial public release.
