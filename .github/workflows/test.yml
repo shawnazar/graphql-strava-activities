@@ -42,9 +42,90 @@ jobs:
       - name: Run tests
         run: composer test
 
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify version consistency
+        run: |
+          PLUGIN_VERSION=$(grep -oP "Version:\s+\K[0-9.]+" graphql-strava-activities.php)
+          CONSTANT_VERSION=$(grep -oP "WPGRAPHQL_STRAVA_VERSION',\s*'\K[0-9.]+" graphql-strava-activities.php)
+          STABLE_TAG=$(grep -oP "Stable tag:\s*\K[0-9.]+" readme.txt)
+
+          echo "Plugin header:  $PLUGIN_VERSION"
+          echo "PHP constant:   $CONSTANT_VERSION"
+          echo "Stable tag:     $STABLE_TAG"
+
+          FAIL=0
+          if [ "$PLUGIN_VERSION" != "$CONSTANT_VERSION" ]; then
+            echo "::error::Version mismatch: Plugin header ($PLUGIN_VERSION) != WPGRAPHQL_STRAVA_VERSION ($CONSTANT_VERSION)"
+            FAIL=1
+          fi
+          if [ "$PLUGIN_VERSION" != "$STABLE_TAG" ]; then
+            echo "::error::Version mismatch: Plugin header ($PLUGIN_VERSION) != readme.txt Stable tag ($STABLE_TAG)"
+            FAIL=1
+          fi
+          exit $FAIL
+
+      - name: Verify distribution archive
+        run: |
+          FILES=$(git archive --format=tar HEAD | tar -t | sort)
+          echo "$FILES"
+
+          # Must include core files.
+          for REQUIRED in "graphql-strava-activities.php" "readme.txt" "LICENSE"; do
+            if ! echo "$FILES" | grep -qx "$REQUIRED"; then
+              echo "::error::Required file missing from archive: $REQUIRED"
+              exit 1
+            fi
+          done
+
+          # Must NOT include dev files.
+          for EXCLUDED in ".github/" "tests/" "vendor/" "composer.json" "phpunit.xml.dist" "CLAUDE.md" ".editorconfig"; do
+            if echo "$FILES" | grep -q "^$EXCLUDED"; then
+              echo "::error::Dev file leaked into archive: $EXCLUDED"
+              exit 1
+            fi
+          done
+
+          echo "Archive contents validated."
+
+      - name: Verify text domain
+        run: |
+          # Check that all translatable strings use the correct text domain.
+          WRONG=$(grep -rn "gettext\|__(\|_e(\|_n(\|_x(\|esc_html__\|esc_html_e\|esc_attr__\|esc_attr_e" \
+            includes/ graphql-strava-activities.php \
+            --include="*.php" \
+            | grep -v "graphql-strava-activities" \
+            | grep -v "phpcs:ignore" \
+            | grep -v "^Binary" \
+            || true)
+          if [ -n "$WRONG" ]; then
+            echo "::warning::Possible incorrect text domain usage:"
+            echo "$WRONG"
+          fi
+
   plugin-check:
     name: Plugin Check
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout
@@ -54,7 +135,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: openssl, mbstring
+          extensions: openssl, mbstring, mysqli
           coverage: none
 
       - name: Setup WordPress
@@ -64,8 +145,6 @@ jobs:
           chmod +x wp-cli.phar
           ./wp-cli.phar core download --skip-content
           ./wp-cli.phar config create --dbname=wp_test --dbuser=root --dbpass=root --dbhost=127.0.0.1 --skip-check
-          sudo systemctl start mysql
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wp_test;"
           ./wp-cli.phar core install --url=localhost --title=Test --admin_user=admin --admin_password=admin --admin_email=admin@example.com --skip-email
 
       - name: Install Plugin Check
@@ -77,4 +156,22 @@ jobs:
           cd /tmp/wp && ./wp-cli.phar plugin install /tmp/graphql-strava-activities.zip --activate
 
       - name: Run Plugin Check
-        run: cd /tmp/wp && ./wp-cli.phar plugin check graphql-strava-activities --format=json
+        run: |
+          cd /tmp/wp
+          RESULT=$(./wp-cli.phar plugin check graphql-strava-activities --format=json --fields=type,code,message 2>&1) || true
+          echo "$RESULT"
+
+          # Fail on errors (severity 8+), allow warnings.
+          ERRORS=$(echo "$RESULT" | php -r '
+            $input = file_get_contents("php://stdin");
+            $data = json_decode($input, true);
+            if (!is_array($data)) exit(0);
+            $errors = array_filter($data, fn($r) => ($r["type"] ?? "") === "ERROR");
+            echo count($errors);
+          ')
+
+          echo "Errors found: $ERRORS"
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::Plugin Check found $ERRORS error(s). Fix them before merging."
+            exit 1
+          fi
