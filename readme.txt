@@ -1,0 +1,111 @@
+=== GraphQL Strava Activities ===
+Contributors: shawnazar
+Tags: graphql, strava, wpgraphql, fitness, activities
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 8.0
+Stable tag: 1.0.0
+License: MIT
+License URI: https://opensource.org/licenses/MIT
+
+Extends WPGraphQL with Strava activity data, server-side SVG route maps, and activity photos.
+
+== Description ==
+
+WPGraphQL for Strava brings your Strava activities into your headless WordPress site via GraphQL. Query your rides, runs, and walks with distance, duration, photos, and beautiful server-side SVG route maps — no JavaScript map libraries required.
+
+**Features:**
+
+* **GraphQL API** — Query Strava activities through WPGraphQL with filtering by type and count.
+* **SVG Route Maps** — Server-rendered inline SVG route maps from Strava polyline data. No Mapbox or Google Maps needed.
+* **Activity Photos** — Fetches primary photos from your Strava activities.
+* **Caching** — Transient-based caching with configurable TTL to stay within Strava rate limits.
+* **Admin Settings** — Full settings page for credentials, SVG customization, display units, and sync controls.
+* **Extensible** — Filters and hooks for customizing cache TTL, SVG appearance, activity types, and more.
+
+**Example GraphQL Query:**
+
+`
+{
+  stravaActivities(first: 10, type: "Ride") {
+    title
+    distance
+    duration
+    date
+    svgMap
+    stravaUrl
+    photoUrl
+    type
+    unit
+  }
+}
+`
+
+== Third-Party Service ==
+
+This plugin connects to the [Strava API v3](https://developers.strava.com/) to fetch your activity data (title, distance, duration, route polylines, and photos). Data is sent to and received from `https://www.strava.com/api/v3/` and `https://www.strava.com/oauth/token`.
+
+No data is sent until you enter your API credentials in the plugin settings. The plugin sends your OAuth tokens to authenticate requests and receives activity data in return. Activity data is cached locally in WordPress transients.
+
+* [Strava API Agreement](https://www.strava.com/legal/api)
+* [Strava Privacy Policy](https://www.strava.com/legal/privacy)
+* [Strava Terms of Service](https://www.strava.com/legal/terms)
+
+== Installation ==
+
+1. Install and activate [WPGraphQL](https://www.wpgraphql.com/) (v2.0+).
+2. Upload the `graphql-strava-activities` folder to `/wp-content/plugins/`.
+3. Activate the plugin through the "Plugins" menu in WordPress.
+4. Go to **Strava** in the admin menu and enter your Strava API credentials.
+5. Query your activities via GraphQL!
+
+**Getting Strava API Credentials:**
+
+1. Go to [Strava API Settings](https://www.strava.com/settings/api) and create an application.
+2. Copy the Client ID and Client Secret into the plugin settings.
+3. Generate an Access Token and Refresh Token using Strava's OAuth flow.
+
+== Frequently Asked Questions ==
+
+= Does this require WPGraphQL? =
+
+Yes. WPGraphQL 2.0 or newer must be installed and active.
+
+= How often are activities synced? =
+
+By default, activities are cached and refreshed every 12 hours via WordPress cron. You can also trigger a manual resync from the admin settings page.
+
+= Can I change the SVG route map appearance? =
+
+Yes. The admin settings page lets you customize stroke color and width. Developers can also use the `wpgraphql_strava_svg_color` and `wpgraphql_strava_svg_stroke_width` filters.
+
+= What activity types are supported? =
+
+All Strava activity types (Ride, Run, Walk, Hike, Swim, etc.) are supported. You can filter which types appear using the admin settings or the `wpgraphql_strava_activity_types` filter.
+
+= Does this work with any headless frontend? =
+
+Yes. Any frontend that can query WPGraphQL (Next.js, Gatsby, Astro, etc.) will work.
+
+== Screenshots ==
+
+1. Admin settings page with credential management.
+2. SVG route map rendered from Strava polyline data.
+3. GraphQL query and response in WPGraphiQL.
+
+== Changelog ==
+
+= 1.0.0 =
+* Initial release.
+* GraphQL schema with StravaActivity type and stravaActivities query.
+* Server-side SVG route map generation from encoded polylines.
+* Strava API client with OAuth token refresh.
+* Transient caching with configurable TTL.
+* Admin settings page for credentials, SVG customization, display options, and sync.
+* Activity photo fetching.
+* Extensible via WordPress filters and hooks.
+
+== Upgrade Notice ==
+
+= 1.0.0 =
+Initial release.

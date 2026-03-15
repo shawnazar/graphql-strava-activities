@@ -1,0 +1,15 @@
+# Files excluded from the WordPress.org release zip.
+/.claude/
+/.editorconfig
+/.git/
+/.github/
+/.gitignore
+/.distignore
+/composer.json
+/composer.lock
+/node_modules/
+/vendor/
+/phpcs.xml.dist
+/CLAUDE.md
+/CONTRIBUTING.md
+/CODE_OF_CONDUCT.md

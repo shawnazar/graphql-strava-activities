@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ruleset name="GraphQL Strava Activities">
+    <description>WordPress Coding Standards for GraphQL Strava Activities.</description>
+
+    <!-- Scan these files -->
+    <file>graphql-strava-activities.php</file>
+    <file>includes/</file>
+
+    <!-- Show progress and sniff codes in all reports -->
+    <arg value="ps"/>
+    <arg name="colors"/>
+
+    <!-- PHP 8.0+ -->
+    <config name="testVersion" value="8.0-"/>
+
+    <!-- WordPress standards -->
+    <rule ref="WordPress">
+        <!-- Allow short array syntax -->
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+    </rule>
+
+    <!-- Set minimum WP version -->
+    <config name="minimum_wp_version" value="6.0"/>
+
+    <!-- Text domain -->
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="graphql-strava-activities"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Prefixes -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="wpgraphql_strava"/>
+                <element value="WPGRAPHQL_STRAVA"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
