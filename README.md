@@ -5,6 +5,7 @@
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)](https://wordpress.org/)
 [![WPGraphQL 2.0+](https://img.shields.io/badge/WPGraphQL-2.0%2B-4B32C3.svg)](https://www.wpgraphql.com/)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange.svg)](https://www.buymeacoffee.com/shawnazar)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://shawnazar.github.io/wp-graphql-strava/)
 
 A WordPress plugin that extends [WPGraphQL](https://www.wpgraphql.com/) with Strava activity data, server-side SVG route maps, and activity photos — no JavaScript map libraries required.
 

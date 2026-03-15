@@ -1,0 +1,19 @@
+- **User Guide**
+  - [Getting Started](getting-started.md)
+  - [OAuth Setup](oauth-setup.md)
+  - [GraphQL Queries](graphql-queries.md)
+  - [Activity Fields](fields.md)
+  - [Admin Settings](settings.md)
+  - [SVG Route Maps](svg-maps.md)
+  - [Shortcodes](shortcodes.md)
+  - [Encryption](encryption.md)
+  - [FAQ](faq.md)
+
+- **Developer Guide**
+  - [Architecture](architecture.md)
+  - [Filters & Hooks](filters.md)
+  - [Contributing](contributing.md)
+  - [Testing](testing.md)
+  - [Static Analysis](static-analysis.md)
+  - [Releasing](releasing.md)
+  - [Strava API](strava-api.md)

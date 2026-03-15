@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- GitHub Pages documentation site with Docsify (user guide + developer guide)
 - Updated readme.txt sync frequency description and GraphQL example to include all 21 fields
 - Added `composer analyse` command to CLAUDE.md
 - Added `poweredByStrava` field to README.md GraphQL example

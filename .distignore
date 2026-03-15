@@ -20,5 +20,6 @@
 /grumphp.yml
 /phpunit.xml.dist
 /phpstan.neon.dist
+/docs/
 /stubs/
 /tests/
