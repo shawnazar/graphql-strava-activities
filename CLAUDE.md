@@ -49,10 +49,12 @@ that depend on them. The bootstrap file handles this.
 3. Write or update tests for any code changes. Run `composer test` to verify
    nothing is broken before committing. Mock external data (Strava API responses,
    HTTP calls) — never hit real APIs in tests.
-4. Commit with descriptive messages that include `Closes #N`.
-5. Push the branch and create a PR via `gh pr create` linked to the issue.
-6. Merge to main after the PR is created.
-7. Document architectural decisions as comments on the GitHub issue.
+4. Update `CHANGELOG.md` under an `[Unreleased]` section with a summary of the change.
+   Use categories: Added, Changed, Fixed, Removed.
+5. Commit with descriptive messages that include `Closes #N`.
+6. Push the branch and create a PR via `gh pr create` linked to the issue.
+7. Merge to main after the PR is created.
+8. Document architectural decisions as comments on the GitHub issue.
 
 ### Testing
 
