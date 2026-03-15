@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shortcode generator button in the classic editor ("Strava" button next to "Add Media")
 - CI validation gates: version consistency check, distribution archive check, text domain check
 - Plugin Check (PCP) now fails CI on errors (was output-only)
+- Security CI job: `composer audit`, debug code detection, hardcoded secret scanning, unsafe PHP function detection
+- Dependency Review on PRs (fails on high-severity vulnerabilities)
 
 ## [1.0.3] - 2026-03-15
 
