@@ -28,7 +28,26 @@
         placeholder: 'Search docs...',
         noData: 'No results.',
         depth: 3
-      }
+      },
+      plugins: [
+        function (hook) {
+          var footer = [
+            '<hr/>',
+            '<footer style="text-align:center; padding: 20px 0; font-size: 13px; color: #646970;">',
+            '<p>Built by <a href="https://shawnazar.me" target="_blank" rel="noopener noreferrer">Shawn Azar</a>',
+            ' · <a href="https://www.buymeacoffee.com/shawnazar" target="_blank" rel="noopener noreferrer">Buy Me a Coffee</a>',
+            ' · <a href="https://github.com/shawnazar/wp-graphql-strava" target="_blank" rel="noopener noreferrer">GitHub</a>',
+            ' · <a href="https://github.com/shawnazar/wp-graphql-strava/issues" target="_blank" rel="noopener noreferrer">Report an Issue</a>',
+            ' · <a href="https://github.com/shawnazar/wp-graphql-strava/discussions" target="_blank" rel="noopener noreferrer">Discussions</a>',
+            ' · Powered by <a href="https://www.strava.com" target="_blank" rel="noopener noreferrer" style="color: #FC5200; font-weight: bold;">Strava</a></p>',
+            '</footer>'
+          ].join('');
+
+          hook.afterEach(function (html) {
+            return html + footer;
+          });
+        }
+      ]
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
