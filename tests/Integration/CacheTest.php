@@ -108,11 +108,6 @@ class CacheTest extends TestCase {
             }
         );
 
-        // Define HOUR_IN_SECONDS if not defined.
-        if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
-            define( 'HOUR_IN_SECONDS', 3600 );
-        }
-
         // Load modules in order.
         require_once dirname( __DIR__, 2 ) . '/includes/polyline.php';
         if ( ! function_exists( 'wpgraphql_strava_polyline_to_svg' ) ) {
