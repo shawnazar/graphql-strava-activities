@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="772" height="250" viewBox="0 0 772 250">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FC5200"/>
+      <stop offset="100%" stop-color="#e04800"/>
+    </linearGradient>
+  </defs>
+  <rect width="772" height="250" fill="url(#bg)"/>
+  <!-- Decorative polyline route paths -->
+  <polyline points="0,200 60,170 130,185 200,140 270,155 340,110 410,130 480,90 550,105 620,70 690,85 772,50"
+            fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,220 80,195 150,210 220,165 300,180 370,135 450,150 530,115 610,125 700,95 772,75"
+            fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="0,240 50,225 120,235 190,200 260,210 340,175 420,185 500,150 580,160 660,130 740,140 772,120"
+            fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Plugin name -->
+  <text x="386" y="115" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">
+    GraphQL Strava Activities
+  </text>
+  <!-- Subtitle -->
+  <text x="386" y="155" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="400" fill="rgba(255,255,255,0.8)">
+    Strava activity data for WPGraphQL
+  </text>
+</svg>

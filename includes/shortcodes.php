@@ -48,7 +48,7 @@ function wpgraphql_strava_render_shortcode_card( array $activity ): string {
 
 	if ( ! empty( $activity['svgMap'] ) ) {
 		$html .= '<div class="strava-activity-map" style="margin-bottom:12px;">';
-		$html .= $activity['svgMap'];
+		$html .= wp_kses( $activity['svgMap'], wpgraphql_strava_allowed_svg_tags() );
 		$html .= '</div>';
 	}
 
@@ -182,7 +182,7 @@ function wpgraphql_strava_shortcode_map( $atts ): string {
 	$height = max( 100, (int) $atts['height'] );
 
 	return '<div class="strava-map" style="width:' . esc_attr( (string) $width ) . 'px;max-width:100%;">'
-		. $activities[ $index ]['svgMap']
+		. wp_kses( $activities[ $index ]['svgMap'], wpgraphql_strava_allowed_svg_tags() )
 		. '</div>';
 }
 

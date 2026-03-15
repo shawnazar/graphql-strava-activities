@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Integration tests for API client (11 tests: token refresh, error handling, 401 retry)
+- Integration tests for GraphQL schema (7 tests: type registration, resolver, filtering)
+- Integration tests for shortcodes (12 tests: all 5 shortcodes, card rendering)
+- `wpgraphql_strava_allowed_svg_tags()` helper for explicit SVG output escaping
+- WordPress.org placeholder banner and icon SVG assets
+
+### Fixed
+- Added nonce verification to Activities list table filter form
+- Whitelisted sort parameters in list table to prevent arbitrary key access
+- Replaced `phpcs:ignore` SVG output with `wp_kses()` and explicit tag allowlist
+
 ## [1.0.1] - 2026-03-15
 
 ### Fixed
