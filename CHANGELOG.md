@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated readme.txt sync frequency description and GraphQL example to include all 21 fields
+- Added `composer analyse` command to CLAUDE.md
+- Added `poweredByStrava` field to README.md GraphQL example
+
 ### Added
 - Weekly, every 2 weeks, and monthly sync frequency options
 - "Powered by Strava" attribution in admin footer and brand attribution docs on Getting Started page

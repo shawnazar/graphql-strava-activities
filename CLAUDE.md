@@ -150,6 +150,7 @@ All filters use the `wpgraphql_strava_` prefix:
 composer install      # Install dev dependencies + GrumPHP pre-commit hooks
 composer lint         # Check coding standards
 composer lint:fix     # Auto-fix violations
+composer analyse      # Run PHPStan static analysis (level 5)
 composer test         # Run all tests
 composer test:unit    # Run unit tests only
 composer test:integration  # Run integration tests only

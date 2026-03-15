@@ -28,7 +28,7 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
 * **Caching** — Transient-based caching with configurable TTL to stay within Strava rate limits.
 * **Admin Settings** — Full settings page for credentials, SVG customization, display units, and sync controls.
 * **Credential Encryption** — Optional AES-256-CBC at-rest encryption for your API tokens.
-* **Configurable Sync** — Choose hourly, twice daily, or daily sync frequency.
+* **Configurable Sync** — Choose from 11 sync frequencies: every 15 minutes to monthly.
 * **Extensible** — Filters and hooks for customizing cache TTL, SVG appearance, activity types, and more.
 
 **Example GraphQL Query:**
@@ -46,11 +46,16 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
         photoUrl
         elevationGain
         averageSpeed
+        maxSpeed
+        averageHeartrate
+        maxHeartrate
         calories
         kudosCount
+        commentCount
         city
         country
         isPrivate
+        poweredByStrava
       }
     }
 
@@ -92,7 +97,7 @@ Yes. WPGraphQL 2.0 or newer is a hard dependency — the plugin will not activat
 
 = How often are activities synced? =
 
-By default, activities are cached and refreshed every 12 hours via WordPress cron. You can also trigger a manual resync from the admin settings page.
+By default, activities are cached and refreshed every 12 hours via WordPress cron. You can choose from 11 sync frequencies (every 15 minutes, 30 minutes, hourly, every 2/4/6/12 hours, daily, weekly, every 2 weeks, or monthly) in the settings. You can also trigger a manual resync from the admin settings page.
 
 = Can I change the SVG route map appearance? =
 

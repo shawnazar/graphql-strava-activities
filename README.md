@@ -70,6 +70,7 @@ Activate in WordPress, then visit **Strava** in the admin menu.
     city
     country
     isPrivate
+    poweredByStrava
   }
 }
 ```
