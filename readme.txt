@@ -9,7 +9,7 @@ Stable tag: 1.0.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Extends WPGraphQL with Strava activity data, server-side SVG route maps, and activity photos.
+Compatible with Strava — extends WPGraphQL with activity data, server-side SVG route maps, and photos.
 
 == Description ==
 
