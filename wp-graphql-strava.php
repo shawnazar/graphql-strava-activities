@@ -117,6 +117,41 @@ add_action( 'plugins_loaded', 'wpgraphql_strava_init' );
 add_action( 'wpgraphql_strava_cron_refresh', 'wpgraphql_strava_refresh_cache' );
 
 /**
+ * Register custom cron schedules for sync intervals WordPress doesn't provide.
+ *
+ * @param array<string, array<string, mixed>> $schedules Existing schedules.
+ * @return array<string, array<string, mixed>> Modified schedules.
+ */
+function wpgraphql_strava_cron_schedules( array $schedules ): array {
+	$custom = [
+		'every_15_minutes' => [
+			'interval' => 15 * MINUTE_IN_SECONDS,
+			'display'  => __( 'Every 15 Minutes', 'graphql-strava-activities' ),
+		],
+		'every_30_minutes' => [
+			'interval' => 30 * MINUTE_IN_SECONDS,
+			'display'  => __( 'Every 30 Minutes', 'graphql-strava-activities' ),
+		],
+		'every_2_hours'    => [
+			'interval' => 2 * HOUR_IN_SECONDS,
+			'display'  => __( 'Every 2 Hours', 'graphql-strava-activities' ),
+		],
+		'every_4_hours'    => [
+			'interval' => 4 * HOUR_IN_SECONDS,
+			'display'  => __( 'Every 4 Hours', 'graphql-strava-activities' ),
+		],
+		'every_6_hours'    => [
+			'interval' => 6 * HOUR_IN_SECONDS,
+			'display'  => __( 'Every 6 Hours', 'graphql-strava-activities' ),
+		],
+	];
+
+	return array_merge( $schedules, $custom );
+}
+
+add_filter( 'cron_schedules', 'wpgraphql_strava_cron_schedules' );
+
+/**
  * On activation: schedule the cron event.
  *
  * @return void
