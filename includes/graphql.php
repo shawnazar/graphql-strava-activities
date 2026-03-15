@@ -149,9 +149,56 @@ function wpgraphql_strava_register_types(): void {
 				// Fetch all cached activities (filtering/slicing done below).
 				$activities = wpgraphql_strava_get_cached_activities( 0 );
 
-				// Type filter.
+				// Type filter with sanitization and validation.
 				$type_filter = sanitize_text_field( $args['type'] ?? '' );
+				
+				// Known Strava activity types for defense in depth.
+				$valid_types = [
+					'Ride',
+					'Run',
+					'Swim',
+					'Walk',
+					'Hike',
+					'AlpineSki',
+					'BackcountrySki',
+					'Canoeing',
+					'Crossfit',
+					'EBikeRide',
+					'Elliptical',
+					'Golf',
+					'Handcycle',
+					'IceSkate',
+					'InlineSkate',
+					'Kayaking',
+					'Kitesurf',
+					'NordicSki',
+					'RockClimbing',
+					'RollerSki',
+					'Rowing',
+					'Snowboard',
+					'Snowshoe',
+					'Soccer',
+					'StairStepper',
+					'StandUpPaddling',
+					'Surfing',
+					'VirtualRide',
+					'VirtualRun',
+					'WeightTraining',
+					'Wheelchair',
+					'Windsurf',
+					'Workout',
+					'Yoga',
+				];
+
 				if ( ! empty( $type_filter ) ) {
+					// Validate against known types (defense in depth).
+					if ( ! in_array( $type_filter, $valid_types, true ) ) {
+						// Log invalid type but don't fail - allow pass-through for future types.
+						if ( function_exists( 'error_log' ) ) {
+							error_log( sprintf( 'WPGraphQL Strava: Unknown activity type "%s"', $type_filter ) );
+						}
+					}
+
 					$activities = array_values(
 						array_filter(
 							$activities,
