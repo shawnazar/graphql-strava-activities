@@ -6,6 +6,9 @@
     <file>wp-graphql-strava.php</file>
     <file>includes/</file>
 
+    <!-- Exclude stubs and tests from scanning -->
+    <exclude-pattern>stubs/</exclude-pattern>
+
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>
     <arg name="colors"/>

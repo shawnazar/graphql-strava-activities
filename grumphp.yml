@@ -11,6 +11,11 @@ grumphp:
       triggered_by:
         - php
 
+    phpstan:
+      configuration: phpstan.neon.dist
+      triggered_by:
+        - php
+
     phpunit:
       config_file: phpunit.xml.dist
       always_execute: true

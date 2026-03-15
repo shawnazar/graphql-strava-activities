@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `composer test`, `composer test:unit`, `composer test:integration` scripts
 - GrumPHP pre-commit hooks — lint and tests run automatically on every commit
 - SUPPORT.md with help channels and in-plugin docs reference
+- PHPStan level 5 static analysis with WordPress extension
+- `composer analyse` script and PHPStan in GrumPHP pre-commit
 - GitHub Release automation — creates release with zip on tag push
 - Repo topics, discussion categories, required PR approvals
 - Sample Strava API response fixture for test mocking

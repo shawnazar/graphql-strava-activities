@@ -184,7 +184,7 @@ function wpgraphql_strava_register_settings(): void {
 	add_settings_section(
 		'wpgraphql_strava_display',
 		__( 'Display', 'graphql-strava-activities' ),
-		null,
+		'__return_null',
 		'wpgraphql-strava'
 	);
 

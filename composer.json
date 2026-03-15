@@ -20,7 +20,9 @@
     "yoast/phpunit-polyfills": "^2.0",
     "wp-phpunit/wp-phpunit": "^6.0",
     "brain/monkey": "^2.6",
-    "phpro/grumphp": "^2.19"
+    "phpro/grumphp": "^2.19",
+    "phpstan/phpstan": "^2.1",
+    "szepeviktor/phpstan-wordpress": "^2.0"
   },
   "autoload-dev": {
     "psr-4": {
@@ -38,6 +40,7 @@
     "lint:fix": "phpcbf",
     "test": "phpunit",
     "test:unit": "phpunit --testsuite unit",
-    "test:integration": "phpunit --testsuite integration"
+    "test:integration": "phpunit --testsuite integration",
+    "analyse": "phpstan analyse"
   }
 }

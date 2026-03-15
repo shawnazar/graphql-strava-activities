@@ -1,0 +1,23 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - wp-graphql-strava.php
+        - includes/
+    excludePaths:
+        - vendor/
+        - tests/
+    bootstrapFiles:
+        - vendor/autoload.php
+    stubFiles:
+        - stubs/wpgraphql.php
+    treatPhpDocTypesAsCertain: false
+    dynamicConstantNames:
+        - GRAPHQL_STRAVA_ENCRYPTION_KEY
+    ignoreErrors:
+        - '#PHPDoc tag @var does not specify variable name#'
+        - '#Constant GRAPHQL_STRAVA_ENCRYPTION_KEY not found#'
+    scanFiles:
+        - stubs/wpgraphql.php
