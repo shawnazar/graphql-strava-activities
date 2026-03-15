@@ -54,11 +54,22 @@ Activate in WordPress, then visit **Strava** in the admin menu.
     distance
     duration
     date
+    type
+    unit
     svgMap
     stravaUrl
     photoUrl
-    type
-    unit
+    elevationGain
+    averageSpeed
+    maxSpeed
+    averageHeartrate
+    maxHeartrate
+    calories
+    kudosCount
+    commentCount
+    city
+    country
+    isPrivate
   }
 }
 ```
@@ -81,6 +92,18 @@ All filters use the `wpgraphql_strava_` prefix:
 add_filter( 'wpgraphql_strava_activity_types', function () {
     return [ 'Ride', 'Run' ];
 } );
+```
+
+## Shortcodes
+
+For non-headless WordPress sites — use in posts and pages:
+
+```
+[strava_activities count="10" type="Ride"]   — Activity card list
+[strava_activity index="0"]                  — Single activity card
+[strava_map index="0"]                       — SVG route map only
+[strava_stats]                               — Aggregate stats
+[strava_latest type="Run"]                   — Most recent activity
 ```
 
 ## Credential Encryption (Optional)

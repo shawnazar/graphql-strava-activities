@@ -20,7 +20,7 @@ Strava activity data, server-side SVG route maps, and activity photos.
 
 ## Requirements
 
-- PHP 8.0+
+- PHP 8.2+
 - WordPress 6.0+
 - WPGraphQL 2.0+
 
@@ -34,8 +34,10 @@ includes/
 ├── svg.php                    # [lat, lng] → inline SVG route map
 ├── api.php                    # Strava API client (activities, detail, token refresh)
 ├── cache.php                  # Transient caching, photo enrichment, normalization
-├── admin.php                  # Settings page + Getting Started documentation
-└── graphql.php                # StravaActivity type + stravaActivities query
+├── admin.php                  # Settings page + Getting Started + Preview + Activities
+├── graphql.php                # StravaActivity type + stravaActivities query
+├── shortcodes.php             # WordPress shortcodes for non-headless sites
+└── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 
 **Load order matters** — `encryption.php` and `polyline.php` must load before modules
@@ -73,6 +75,44 @@ that depend on them. The bootstrap file handles this.
 - All user input sanitized (`sanitize_*`), all output escaped (`esc_*`)
 - Nonces on all admin forms
 - Text domain `graphql-strava-activities` for all translatable strings
+
+## GraphQL Fields
+
+The `StravaActivity` type exposes 21 fields. All come from the Strava list endpoint
+(no extra API calls needed):
+
+| Field | Type | Source |
+|---|---|---|
+| title | String | `name` |
+| distance | Float | `distance` (converted to mi/km) |
+| duration | String | `moving_time` (formatted) |
+| date | String | `start_date` |
+| type | String | `type` |
+| unit | String | Setting |
+| svgMap | String | `map.summary_polyline` (rendered) |
+| stravaUrl | String | `id` (constructed URL) |
+| photoUrl | String | `photos.primary.urls` |
+| elevationGain | Float | `total_elevation_gain` (metres) |
+| averageSpeed | Float | `average_speed` (m/s) |
+| maxSpeed | Float | `max_speed` (m/s) |
+| averageHeartrate | Float | `average_heartrate` (nullable) |
+| maxHeartrate | Int | `max_heartrate` (nullable) |
+| calories | Float | `kilojoules` × 0.239 (nullable) |
+| kudosCount | Int | `kudos_count` |
+| commentCount | Int | `comment_count` |
+| city | String | `location_city` |
+| country | String | `location_country` |
+| isPrivate | Boolean | `private` |
+
+## Shortcodes
+
+| Shortcode | Attributes | Description |
+|---|---|---|
+| `[strava_activities]` | `count`, `type` | Activity card list |
+| `[strava_activity]` | `index` | Single activity card |
+| `[strava_map]` | `index`, `width`, `height`, `color` | SVG route map only |
+| `[strava_stats]` | — | Aggregate stats |
+| `[strava_latest]` | `type` | Most recent activity |
 
 ## Security Rules
 

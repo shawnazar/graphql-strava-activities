@@ -39,11 +39,18 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
         distance
         duration
         date
+        type
+        unit
         svgMap
         stravaUrl
         photoUrl
-        type
-        unit
+        elevationGain
+        averageSpeed
+        calories
+        kudosCount
+        city
+        country
+        isPrivate
       }
     }
 

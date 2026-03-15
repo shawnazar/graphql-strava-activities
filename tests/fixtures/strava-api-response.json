@@ -6,6 +6,17 @@
     "moving_time": 2520,
     "type": "Run",
     "start_date": "2026-03-13T07:30:00Z",
+    "total_elevation_gain": 45.2,
+    "average_speed": 3.27,
+    "max_speed": 4.8,
+    "average_heartrate": 152.0,
+    "max_heartrate": 178,
+    "kilojoules": 1250.5,
+    "kudos_count": 12,
+    "comment_count": 3,
+    "location_city": "Denver",
+    "location_country": "United States",
+    "private": false,
     "map": {
       "summary_polyline": "o~l~Fv}naSqAmBwCcA{BjA_CxBoAvC"
     },
@@ -25,6 +36,14 @@
     "moving_time": 3900,
     "type": "Ride",
     "start_date": "2026-03-12T12:00:00Z",
+    "total_elevation_gain": 210.8,
+    "average_speed": 7.6,
+    "max_speed": 12.4,
+    "kudos_count": 5,
+    "comment_count": 0,
+    "location_city": "Denver",
+    "location_country": "United States",
+    "private": false,
     "map": {
       "summary_polyline": "kel~FhwoaSsEqHwIaFoLbCaJrGoFvKcBxI"
     },
@@ -39,6 +58,12 @@
     "moving_time": 3600,
     "type": "Yoga",
     "start_date": "2026-03-11T09:00:00Z",
+    "total_elevation_gain": 0,
+    "average_speed": 0,
+    "max_speed": 0,
+    "kudos_count": 2,
+    "comment_count": 1,
+    "private": true,
     "map": {
       "summary_polyline": ""
     },

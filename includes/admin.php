@@ -766,41 +766,32 @@ function wpgraphql_strava_render_guide_page(): void {
 			<div class="card" style="max-width: 800px; padding: 16px 24px;">
 				<h2 style="margin-top: 8px;"><?php esc_html_e( 'GraphQL Query Examples', 'graphql-strava-activities' ); ?></h2>
 
-				<h3><?php esc_html_e( 'Fetch all activities', 'graphql-strava-activities' ); ?></h3>
+				<h3><?php esc_html_e( 'Fetch all activities with full data', 'graphql-strava-activities' ); ?></h3>
 				<pre style="background: #f0f0f1; padding: 12px; overflow-x: auto; font-size: 13px;">{
-	stravaActivities {
-	title
-	distance
-	duration
-	date
-	svgMap
-	stravaUrl
-	photoUrl
-	type
-	unit
-	}
+  stravaActivities {
+	title distance duration date type unit
+	svgMap stravaUrl photoUrl
+	elevationGain averageSpeed maxSpeed
+	averageHeartrate maxHeartrate calories
+	kudosCount commentCount city country isPrivate
+  }
 }</pre>
 
-				<h3><?php esc_html_e( 'Fetch latest 5 rides', 'graphql-strava-activities' ); ?></h3>
+				<h3><?php esc_html_e( 'Fetch latest 5 rides with performance data', 'graphql-strava-activities' ); ?></h3>
 				<pre style="background: #f0f0f1; padding: 12px; overflow-x: auto; font-size: 13px;">{
-	stravaActivities(first: 5, type: "Ride") {
-	title
-	distance
-	duration
-	svgMap
-	}
+  stravaActivities(first: 5, type: "Ride") {
+	title distance duration svgMap
+	elevationGain averageSpeed calories
+  }
 }</pre>
 
-				<h3><?php esc_html_e( 'Fetch runs with photos', 'graphql-strava-activities' ); ?></h3>
+				<h3><?php esc_html_e( 'Fetch runs with heart rate and location', 'graphql-strava-activities' ); ?></h3>
 				<pre style="background: #f0f0f1; padding: 12px; overflow-x: auto; font-size: 13px;">{
-	stravaActivities(type: "Run") {
-	title
-	distance
-	duration
-	date
-	photoUrl
-	stravaUrl
-	}
+  stravaActivities(type: "Run") {
+	title distance duration date
+	averageHeartrate maxHeartrate
+	city country photoUrl stravaUrl
+  }
 }</pre>
 			</div>
 
@@ -825,6 +816,17 @@ function wpgraphql_strava_render_guide_page(): void {
 						<tr><td><code>type</code></td><td>String</td><td><?php esc_html_e( 'Activity type — Ride, Run, Walk, Hike, Swim, etc.', 'graphql-strava-activities' ); ?></td></tr>
 						<tr><td><code>photoUrl</code></td><td>String</td><td><?php esc_html_e( 'Primary activity photo URL', 'graphql-strava-activities' ); ?></td></tr>
 						<tr><td><code>unit</code></td><td>String</td><td><?php esc_html_e( '"mi" or "km"', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>elevationGain</code></td><td>Float</td><td><?php esc_html_e( 'Total elevation gain in metres', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>averageSpeed</code></td><td>Float</td><td><?php esc_html_e( 'Average speed in metres per second', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>maxSpeed</code></td><td>Float</td><td><?php esc_html_e( 'Maximum speed in metres per second', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>averageHeartrate</code></td><td>Float</td><td><?php esc_html_e( 'Average heart rate in bpm (null if no HR data)', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>maxHeartrate</code></td><td>Int</td><td><?php esc_html_e( 'Maximum heart rate in bpm (null if no HR data)', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>calories</code></td><td>Float</td><td><?php esc_html_e( 'Estimated calories burned (null if unavailable)', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>kudosCount</code></td><td>Int</td><td><?php esc_html_e( 'Number of kudos on this activity', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>commentCount</code></td><td>Int</td><td><?php esc_html_e( 'Number of comments on this activity', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>city</code></td><td>String</td><td><?php esc_html_e( 'City where the activity started', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>country</code></td><td>String</td><td><?php esc_html_e( 'Country where the activity started', 'graphql-strava-activities' ); ?></td></tr>
+						<tr><td><code>isPrivate</code></td><td>Boolean</td><td><?php esc_html_e( 'Whether this is a private activity', 'graphql-strava-activities' ); ?></td></tr>
 					</tbody>
 				</table>
 			</div>
@@ -1171,15 +1173,26 @@ function wpgraphql_strava_render_preview_page(): void {
 							<?php
 							$first          = $activities[0];
 							$fields_to_show = [
-								'title'     => $first['title'] ?? '',
-								'distance'  => (string) ( $first['distance'] ?? '' ),
-								'duration'  => $first['duration'] ?? '',
-								'date'      => $first['date'] ?? '',
-								'type'      => $first['type'] ?? '',
-								'unit'      => $first['unit'] ?? '',
-								'stravaUrl' => $first['stravaUrl'] ?? '',
-								'photoUrl'  => $first['photoUrl'] ?? '(none)',
-								'svgMap'    => ! empty( $first['svgMap'] )
+								'title'            => $first['title'] ?? '',
+								'distance'         => (string) ( $first['distance'] ?? '' ),
+								'duration'         => $first['duration'] ?? '',
+								'date'             => $first['date'] ?? '',
+								'type'             => $first['type'] ?? '',
+								'unit'             => $first['unit'] ?? '',
+								'stravaUrl'        => $first['stravaUrl'] ?? '',
+								'photoUrl'         => $first['photoUrl'] ?? '(none)',
+								'elevationGain'    => (string) ( $first['elevationGain'] ?? '0' ),
+								'averageSpeed'     => (string) ( $first['averageSpeed'] ?? '0' ),
+								'maxSpeed'         => (string) ( $first['maxSpeed'] ?? '0' ),
+								'averageHeartrate' => isset( $first['averageHeartrate'] ) ? (string) $first['averageHeartrate'] : '(none)',
+								'maxHeartrate'     => isset( $first['maxHeartrate'] ) ? (string) $first['maxHeartrate'] : '(none)',
+								'calories'         => isset( $first['calories'] ) ? (string) $first['calories'] : '(none)',
+								'kudosCount'       => (string) ( $first['kudosCount'] ?? '0' ),
+								'commentCount'     => (string) ( $first['commentCount'] ?? '0' ),
+								'city'             => $first['city'] ?? '(none)',
+								'country'          => $first['country'] ?? '(none)',
+								'isPrivate'        => ! empty( $first['isPrivate'] ) ? 'true' : 'false',
+								'svgMap'           => ! empty( $first['svgMap'] )
 									? substr( $first['svgMap'], 0, 80 ) . '…'
 									: '(empty)',
 							];

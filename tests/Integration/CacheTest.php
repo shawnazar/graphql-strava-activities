@@ -150,7 +150,8 @@ class CacheTest extends TestCase {
     }
 
     public function test_process_activities_includes_no_route_when_enabled(): void {
-        $this->options['wpgraphql_strava_include_no_route'] = true;
+        $this->options['wpgraphql_strava_include_no_route']  = true;
+        $this->options['wpgraphql_strava_include_private'] = true;
 
         $fixture   = file_get_contents( dirname( __DIR__ ) . '/fixtures/strava-api-response.json' );
         $raw       = json_decode( $fixture, true );
