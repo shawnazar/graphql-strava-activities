@@ -8,6 +8,7 @@
 
     <!-- Exclude stubs and tests from scanning -->
     <exclude-pattern>stubs/</exclude-pattern>
+    <exclude-pattern>tests/</exclude-pattern>
 
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>

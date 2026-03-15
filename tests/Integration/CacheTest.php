@@ -149,6 +149,24 @@ class CacheTest extends TestCase {
         $this->assertNotContains( 'Yoga', $types );
     }
 
+    public function test_process_activities_includes_no_route_when_enabled(): void {
+        $this->options['wpgraphql_strava_include_no_route'] = true;
+
+        $fixture   = file_get_contents( dirname( __DIR__ ) . '/fixtures/strava-api-response.json' );
+        $raw       = json_decode( $fixture, true );
+        $processed = wpgraphql_strava_process_activities( $raw );
+
+        // All 3 activities should be included now (including Yoga with no route).
+        $this->assertCount( 3, $processed );
+
+        $types = array_column( $processed, 'type' );
+        $this->assertContains( 'Yoga', $types );
+
+        // Yoga activity should have an empty svgMap.
+        $yoga = array_values( array_filter( $processed, fn( $a ) => $a['type'] === 'Yoga' ) );
+        $this->assertSame( '', $yoga[0]['svgMap'] );
+    }
+
     public function test_process_activities_converts_distance_miles(): void {
         $this->options['wpgraphql_strava_units'] = 'mi';
 

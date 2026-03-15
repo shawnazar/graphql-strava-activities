@@ -132,9 +132,10 @@ function wpgraphql_strava_process_activities( array $raw_activities ): array {
 			continue;
 		}
 
-		// Skip activities without a GPS route.
-		$polyline = $activity['map']['summary_polyline'] ?? '';
-		if ( empty( $polyline ) ) {
+		// Optionally skip activities without a GPS route.
+		$polyline       = $activity['map']['summary_polyline'] ?? '';
+		$include_no_route = (bool) get_option( 'wpgraphql_strava_include_no_route', false );
+		if ( empty( $polyline ) && ! $include_no_route ) {
 			continue;
 		}
 

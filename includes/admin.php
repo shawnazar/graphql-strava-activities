@@ -234,6 +234,24 @@ function wpgraphql_strava_register_settings(): void {
 		'wpgraphql-strava-settings',
 		'wpgraphql_strava_display'
 	);
+
+	register_setting(
+		'wpgraphql_strava_settings',
+		'wpgraphql_strava_include_no_route',
+		[
+			'type'              => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'default'           => false,
+		]
+	);
+
+	add_settings_field(
+		'wpgraphql_strava_include_no_route',
+		__( 'Activities Without Routes', 'graphql-strava-activities' ),
+		'wpgraphql_strava_render_no_route_field',
+		'wpgraphql-strava',
+		'wpgraphql_strava_display'
+	);
 }
 
 // ------------------------------------------------------------------
@@ -324,6 +342,24 @@ function wpgraphql_strava_render_units_field(): void {
 			<?php esc_html_e( 'Kilometres', 'graphql-strava-activities' ); ?>
 		</label>
 	</fieldset>
+	<?php
+}
+
+/**
+ * Render the "include activities without routes" checkbox.
+ *
+ * @return void
+ */
+function wpgraphql_strava_render_no_route_field(): void {
+	$value = (bool) get_option( 'wpgraphql_strava_include_no_route', false );
+	?>
+	<label>
+		<input type="checkbox" name="wpgraphql_strava_include_no_route" value="1" <?php checked( $value ); ?> />
+		<?php esc_html_e( 'Include indoor and GPS-less activities (yoga, weight training, treadmill, etc.)', 'graphql-strava-activities' ); ?>
+	</label>
+	<p class="description">
+		<?php esc_html_e( 'When enabled, activities without GPS routes will appear with an empty svgMap field.', 'graphql-strava-activities' ); ?>
+	</p>
 	<?php
 }
 
