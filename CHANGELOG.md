@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-03-15
+
 ### Added
 - One-click "Connect with Strava" OAuth flow — eliminates manual curl token exchange
 - OAuth callback handler with CSRF protection via state nonce
