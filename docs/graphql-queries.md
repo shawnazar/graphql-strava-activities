@@ -22,7 +22,8 @@ Returns all cached activities with the requested fields.
 
 | Argument | Type | Default | Description |
 |---|---|---|---|
-| `first` | Int | `0` (all) | Number of activities to return |
+| `first` | Int | `0` (all, max 200) | Number of activities to return |
+| `offset` | Int | `0` | Number of activities to skip (for pagination) |
 | `type` | String | — | Filter by activity type (e.g. `"Ride"`, `"Run"`) |
 
 ## Filtered Query
@@ -36,6 +37,7 @@ Returns all cached activities with the requested fields.
     date
     type
     unit
+    speedUnit
     svgMap
     stravaUrl
     photoUrl
@@ -55,6 +57,22 @@ Returns all cached activities with the requested fields.
 }
 ```
 
+## Pagination with Offset
+
+Use `offset` to paginate through activities:
+
+```graphql
+{
+  stravaActivities(first: 10, offset: 10) {
+    title
+    distance
+    duration
+  }
+}
+```
+
+This returns activities 11-20. Combine with `type` to paginate filtered results.
+
 ## Example Response
 
 ```json
@@ -68,12 +86,13 @@ Returns all cached activities with the requested fields.
         "date": "2026-03-15T08:30:00Z",
         "type": "Ride",
         "unit": "mi",
+        "speedUnit": "mph",
         "svgMap": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 200\"...>",
         "stravaUrl": "https://www.strava.com/activities/12345678901",
         "photoUrl": "https://dgtzuqphqg23d.cloudfront.net/...",
         "elevationGain": 312.5,
-        "averageSpeed": 5.56,
-        "maxSpeed": 12.34,
+        "averageSpeed": 12.44,
+        "maxSpeed": 27.6,
         "averageHeartrate": 145.0,
         "maxHeartrate": 172,
         "calories": 580.0,
@@ -88,6 +107,16 @@ Returns all cached activities with the requested fields.
   }
 }
 ```
+
+## REST API
+
+A REST endpoint is also available for non-GraphQL use cases:
+
+```
+GET /wp-json/wpgraphql-strava/v1/activities?count=10&type=Ride&offset=0
+```
+
+Returns the same data structure as the GraphQL query. The `X-WP-Total` header contains the total activity count.
 
 ## Frontend Examples
 

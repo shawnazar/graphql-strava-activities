@@ -41,6 +41,7 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
         date
         type
         unit
+        speedUnit
         svgMap
         stravaUrl
         photoUrl

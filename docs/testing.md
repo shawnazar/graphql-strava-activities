@@ -8,12 +8,17 @@ tests/
 ├── fixtures/
 │   └── strava-api-response.json  # Sample Strava API response
 ├── Unit/
-│   ├── EncryptionTest.php     # AES-256-CBC encrypt/decrypt
-│   ├── PolylineTest.php       # Polyline decoder
-│   └── SvgTest.php            # SVG route map generator
+│   ├── EncryptionTest.php     # AES-256-CBC encrypt/decrypt (8 tests)
+│   ├── PolylineTest.php       # Polyline decoder (4 tests)
+│   └── SvgTest.php            # SVG route map generator (9 tests)
 └── Integration/
-    └── CacheTest.php          # Cache module (processing, distance, photos, duration)
+    ├── ApiTest.php            # Strava API client (11 tests)
+    ├── CacheTest.php          # Cache module (14 tests)
+    ├── GraphQLTest.php        # GraphQL schema & resolver (7 tests)
+    └── ShortcodesTest.php     # Shortcode rendering (12 tests)
 ```
+
+**65 tests total** across 7 test files (21 unit + 44 integration).
 
 ## Running Tests
 

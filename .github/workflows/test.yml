@@ -188,6 +188,47 @@ jobs:
             echo "$WRONG"
           fi
 
+      - name: Verify documentation consistency
+        run: |
+          FAIL=0
+
+          # Count GraphQL fields in the StravaActivity type definition.
+          # Fields are at 4-tab indent ending with "=> [" before the args section.
+          CODE_FIELDS=$(sed -n '/register_graphql_object_type/,/register_graphql_field/p' includes/graphql.php | grep -cP "^\t{4}'[a-z]" || echo 0)
+          # Count in docs/fields.md (table rows with backtick-wrapped field names).
+          DOC_FIELDS=$(grep -cP '^\| `\w+`' docs/fields.md || echo 0)
+
+          echo "GraphQL fields in code: $CODE_FIELDS"
+          echo "Fields documented: $DOC_FIELDS"
+
+          if [ "$CODE_FIELDS" != "$DOC_FIELDS" ]; then
+            echo "::error::Field count mismatch: graphql.php has $CODE_FIELDS fields but docs/fields.md documents $DOC_FIELDS"
+            FAIL=1
+          fi
+
+          # Count includes/ PHP files vs architecture.md entries.
+          CODE_INCLUDES=$(find includes/ -name "*.php" | wc -l)
+          DOC_INCLUDES=$(grep -cP '├──|└──' docs/architecture.md || echo 0)
+
+          echo "PHP files in includes/: $CODE_INCLUDES"
+          echo "Files in architecture.md: $DOC_INCLUDES"
+
+          if [ "$CODE_INCLUDES" != "$DOC_INCLUDES" ]; then
+            echo "::error::Architecture doc mismatch: includes/ has $CODE_INCLUDES files but docs/architecture.md lists $DOC_INCLUDES"
+            FAIL=1
+          fi
+
+          # Verify CLAUDE.md field count matches code.
+          CLAUDE_FIELDS=$(grep -oP 'exposes \K\d+' CLAUDE.md || echo 0)
+          echo "CLAUDE.md states: $CLAUDE_FIELDS fields"
+
+          if [ "$CLAUDE_FIELDS" != "$CODE_FIELDS" ]; then
+            echo "::error::CLAUDE.md says $CLAUDE_FIELDS fields but code has $CODE_FIELDS"
+            FAIL=1
+          fi
+
+          exit $FAIL
+
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest

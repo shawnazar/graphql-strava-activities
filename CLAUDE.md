@@ -140,6 +140,7 @@ All filters use the `wpgraphql_strava_` prefix:
 | `wpgraphql_strava_svg_attributes` | `[]` | Extra SVG element attributes |
 | `wpgraphql_strava_activities` | — | Filter activities before caching |
 | `wpgraphql_strava_activity_types` | `[]` (all) | Whitelist of allowed types |
+| `wpgraphql_strava_activities_to_fetch` | `200` | Max activities to sync (clamped to 200) |
 
 ## Releasing
 

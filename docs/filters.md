@@ -107,14 +107,61 @@ add_filter( 'wpgraphql_strava_activity_types', function () {
 } );
 ```
 
+### `wpgraphql_strava_activities_to_fetch`
+
+Maximum number of activities to fetch from Strava per sync (clamped to 200).
+
+| | |
+|---|---|
+| **Default** | `200` |
+| **Location** | `cache.php` |
+| **Parameter** | `int $count` |
+
+```php
+// Fetch only 50 activities per sync
+add_filter( 'wpgraphql_strava_activities_to_fetch', function () {
+    return 50;
+} );
+```
+
 ## Action Hooks
+
+### `wpgraphql_strava_before_sync`
+
+Fires before activities are fetched from the Strava API.
+
+| | |
+|---|---|
+| **Location** | `cache.php` |
+| **Parameters** | None |
+
+```php
+add_action( 'wpgraphql_strava_before_sync', function () {
+    error_log( 'Strava sync starting...' );
+} );
+```
+
+### `wpgraphql_strava_after_sync`
+
+Fires after activities have been fetched, processed, and cached.
+
+| | |
+|---|---|
+| **Location** | `cache.php` |
+| **Parameters** | `array $activities` (processed), `int $raw_count` (from API) |
+
+```php
+add_action( 'wpgraphql_strava_after_sync', function ( $activities, $raw_count ) {
+    error_log( "Synced $raw_count activities, cached " . count( $activities ) );
+}, 10, 2 );
+```
 
 ### `wpgraphql_strava_cron_refresh`
 
 WordPress cron action that triggers a cache refresh. Scheduled automatically based on the sync frequency setting.
 
 ```php
-// Run something after every sync
+// Run something after every cron sync
 add_action( 'wpgraphql_strava_cron_refresh', function () {
     // Custom post-sync logic
 }, 20 );
