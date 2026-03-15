@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wpgraphql_strava_activities_to_fetch` filter (default 200, max 200)
 - Copy-to-clipboard buttons on GraphQL query examples in Getting Started page
 - Input validation: `first` clamped to 0-200, `offset` validated, `type` sanitized
+- REST API endpoint: `GET /wp-json/wpgraphql-strava/v1/activities` with `count`, `offset`, `type` params
+- SVG route thumbnails in admin Activities list table (replaces checkmarks)
+- Plugin Check (PCP) job in CI workflow
+- GitHub topics for repository discoverability
 
 ## [1.0.3] - 2026-03-15
 

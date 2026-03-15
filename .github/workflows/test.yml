@@ -41,3 +41,40 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  plugin-check:
+    name: Plugin Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: openssl, mbstring
+          coverage: none
+
+      - name: Setup WordPress
+        run: |
+          mkdir -p /tmp/wp && cd /tmp/wp
+          curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          ./wp-cli.phar core download --skip-content
+          ./wp-cli.phar config create --dbname=wp_test --dbuser=root --dbpass=root --dbhost=127.0.0.1 --skip-check
+          sudo systemctl start mysql
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wp_test;"
+          ./wp-cli.phar core install --url=localhost --title=Test --admin_user=admin --admin_password=admin --admin_email=admin@example.com --skip-email
+
+      - name: Install Plugin Check
+        run: cd /tmp/wp && ./wp-cli.phar plugin install plugin-check --activate
+
+      - name: Build and install plugin
+        run: |
+          git archive --format=zip --prefix=graphql-strava-activities/ HEAD -o /tmp/graphql-strava-activities.zip
+          cd /tmp/wp && ./wp-cli.phar plugin install /tmp/graphql-strava-activities.zip --activate
+
+      - name: Run Plugin Check
+        run: cd /tmp/wp && ./wp-cli.phar plugin check graphql-strava-activities --format=json

@@ -195,15 +195,19 @@ class WPGRAPHQL_Strava_Activities_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Route column — shows check or dash.
+	 * Route column — shows SVG thumbnail or dash.
 	 *
 	 * @param array<string, mixed> $item Activity data.
 	 * @return string Cell content.
 	 */
 	public function column_route( array $item ): string {
-		return ! empty( $item['svgMap'] )
-			? '<span style="color:#16a34a;" title="' . esc_attr__( 'Has route map', 'graphql-strava-activities' ) . '">&#10003;</span>'
-			: '<span style="color:#9ca3af;">—</span>';
+		if ( empty( $item['svgMap'] ) ) {
+			return '<span style="color:#9ca3af;">—</span>';
+		}
+
+		return '<div style="width:60px;height:40px;overflow:hidden;">'
+			. wp_kses( $item['svgMap'], wpgraphql_strava_allowed_svg_tags() )
+			. '</div>';
 	}
 
 	/**
