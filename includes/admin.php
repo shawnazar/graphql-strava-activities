@@ -204,7 +204,7 @@ function wpgraphql_strava_register_settings(): void {
 		'wpgraphql_strava_cron_schedule',
 		[
 			'type'              => 'string',
-			'sanitize_callback' => static fn( $val ) => in_array( $val, [ 'hourly', 'twicedaily', 'daily' ], true ) ? $val : 'twicedaily',
+			'sanitize_callback' => static fn( $val ) => in_array( $val, [ 'every_15_minutes', 'every_30_minutes', 'hourly', 'every_2_hours', 'every_4_hours', 'every_6_hours', 'twicedaily', 'daily' ], true ) ? $val : 'twicedaily',
 			'default'           => 'twicedaily',
 		]
 	);
@@ -371,10 +371,29 @@ function wpgraphql_strava_render_no_route_field(): void {
 function wpgraphql_strava_render_cron_field(): void {
 	$value   = get_option( 'wpgraphql_strava_cron_schedule', 'twicedaily' );
 	$options = [
-		'hourly'     => __( 'Every Hour', 'graphql-strava-activities' ),
-		'twicedaily' => __( 'Twice Daily', 'graphql-strava-activities' ),
-		'daily'      => __( 'Once Daily', 'graphql-strava-activities' ),
+		'every_15_minutes' => __( 'Every 15 Minutes', 'graphql-strava-activities' ),
+		'every_30_minutes' => __( 'Every 30 Minutes', 'graphql-strava-activities' ),
+		'hourly'           => __( 'Every Hour', 'graphql-strava-activities' ),
+		'every_2_hours'    => __( 'Every 2 Hours', 'graphql-strava-activities' ),
+		'every_4_hours'    => __( 'Every 4 Hours', 'graphql-strava-activities' ),
+		'every_6_hours'    => __( 'Every 6 Hours', 'graphql-strava-activities' ),
+		'twicedaily'       => __( 'Every 12 Hours', 'graphql-strava-activities' ),
+		'daily'            => __( 'Once Daily', 'graphql-strava-activities' ),
 	];
+
+	// Estimate daily API calls: ~6 per sync × syncs per day.
+	$intervals   = [
+		'every_15_minutes' => 96,
+		'every_30_minutes' => 48,
+		'hourly'           => 24,
+		'every_2_hours'    => 12,
+		'every_4_hours'    => 6,
+		'every_6_hours'    => 4,
+		'twicedaily'       => 2,
+		'daily'            => 1,
+	];
+	$syncs_per_day = $intervals[ $value ] ?? 2;
+	$daily_calls   = $syncs_per_day * 6;
 	?>
 	<select name="wpgraphql_strava_cron_schedule">
 		<?php foreach ( $options as $key => $label ) : ?>
@@ -384,7 +403,14 @@ function wpgraphql_strava_render_cron_field(): void {
 		<?php endforeach; ?>
 	</select>
 	<p class="description">
-		<?php esc_html_e( 'How often WordPress cron refreshes your Strava activities. Hourly uses more API quota.', 'graphql-strava-activities' ); ?>
+		<?php
+		printf(
+			/* translators: 1: Estimated daily API calls, 2: Daily limit */
+			esc_html__( 'Estimated API usage: ~%1$d calls/day (limit: 1,000). Intervals under 1 hour use significant API quota.', 'graphql-strava-activities' ),
+			(int) $daily_calls,
+			(int) 1000
+		);
+		?>
 	</p>
 	<?php
 }
