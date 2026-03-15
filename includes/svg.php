@@ -15,6 +15,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Return allowed HTML tags and attributes for SVG route maps.
+ *
+ * Used with wp_kses() to safely output SVG markup generated
+ * by wpgraphql_strava_polyline_to_svg().
+ *
+ * @return array<string, array<string, true>> Allowed tags and attributes.
+ */
+function wpgraphql_strava_allowed_svg_tags(): array {
+	return [
+		'svg'  => [
+			'xmlns'    => true,
+			'viewbox'  => true,
+			'width'    => true,
+			'height'   => true,
+			'role'     => true,
+			'aria-label' => true,
+			'class'    => true,
+			'style'    => true,
+		],
+		'path' => [
+			'd'               => true,
+			'fill'            => true,
+			'stroke'          => true,
+			'stroke-width'    => true,
+			'stroke-linecap'  => true,
+			'stroke-linejoin' => true,
+		],
+	];
+}
+
+/**
  * Convert an encoded polyline to an inline SVG route map.
  *
  * Stroke color and width fall back to saved options, then to defaults.

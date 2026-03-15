@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="48" ry="48" fill="#FC5200"/>
+  <!-- Stylized polyline route path -->
+  <polyline points="56,180 88,130 108,155 140,90 160,120 192,65 200,80"
+            fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Small location dot at the end -->
+  <circle cx="200" cy="80" r="8" fill="#ffffff"/>
+  <circle cx="200" cy="80" r="4" fill="#FC5200"/>
+</svg>
