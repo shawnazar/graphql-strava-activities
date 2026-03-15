@@ -42,6 +42,85 @@ jobs:
       - name: Run tests
         run: composer test
 
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: openssl, mbstring
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Composer audit
+        run: composer audit --format=plain
+
+      - name: Composer validate
+        run: composer validate --no-check-publish
+
+      - name: Check for debug code in production files
+        run: |
+          FAIL=0
+
+          # Functions that should never appear in production plugin code.
+          for PATTERN in 'var_dump\s*(' 'print_r\s*(' '\bdie\s*(' '\bdd\s*(' 'var_export\s*(' 'debug_backtrace\s*(' 'phpinfo\s*(' 'error_log\s*('; do
+            MATCHES=$(grep -rnP "$PATTERN" includes/ graphql-strava-activities.php --include="*.php" || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error::Debug function found in production code:"
+              echo "$MATCHES"
+              FAIL=1
+            fi
+          done
+
+          exit $FAIL
+
+      - name: Scan for hardcoded secrets
+        run: |
+          FAIL=0
+
+          # Patterns that suggest hardcoded credentials.
+          PATTERNS=(
+            'AKIA[0-9A-Z]{16}'                          # AWS access key
+            'sk_live_[0-9a-zA-Z]{24,}'                  # Stripe secret key
+            'ghp_[0-9a-zA-Z]{36}'                       # GitHub personal token
+            'password\s*=\s*["\x27][^"\x27]{8,}["\x27]' # Hardcoded password assignment
+            'secret\s*=\s*["\x27][0-9a-f]{32,}["\x27]'  # Hardcoded secret
+          )
+
+          for PATTERN in "${PATTERNS[@]}"; do
+            MATCHES=$(grep -rnPl "$PATTERN" includes/ graphql-strava-activities.php --include="*.php" 2>/dev/null || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error::Possible hardcoded secret detected in: $MATCHES"
+              FAIL=1
+            fi
+          done
+
+          exit $FAIL
+
+      - name: Check for unsafe PHP functions
+        run: |
+          FAIL=0
+
+          # Functions flagged by WordPress security guidelines.
+          for PATTERN in '\beval\s*(' '\bexec\s*(' '\bsystem\s*(' '\bpassthru\s*(' '\bshell_exec\s*(' '\bproc_open\s*(' '\bpopen\s*(' '\bfile_put_contents\s*(' '\bfile_get_contents\s*(' '\bunserialize\s*('; do
+            MATCHES=$(grep -rnP "$PATTERN" includes/ graphql-strava-activities.php --include="*.php" || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error::Unsafe PHP function found in production code:"
+              echo "$MATCHES"
+              FAIL=1
+            fi
+          done
+
+          exit $FAIL
+
   validate:
     name: Validate
     runs-on: ubuntu-latest
@@ -108,6 +187,20 @@ jobs:
             echo "::warning::Possible incorrect text domain usage:"
             echo "$WRONG"
           fi
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
 
   plugin-check:
     name: Plugin Check
