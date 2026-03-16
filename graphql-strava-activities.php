@@ -3,7 +3,7 @@
  * Plugin Name:       GraphQL Strava Activities
  * Plugin URI:        https://github.com/shawnazar/graphql-strava-activities
  * Description:       Compatible with Strava — extends WPGraphQL with activity data, server-side SVG route maps, and photos.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.0
  * Requires PHP:      8.2
  * Requires Plugins:  wp-graphql
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-define( 'WPGRAPHQL_STRAVA_VERSION', '0.1.0' );
+define( 'WPGRAPHQL_STRAVA_VERSION', '0.1.1' );
 
 /**
  * Plugin root directory path.

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-16
+
 ### Fixed
 - Upgraded `github/codeql-action` from v3 to v4 (Node.js 24 support)
 - Set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment variable in CI
