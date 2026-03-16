@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-16
+
 ### Added
 - Inline Client ID and Secret form on Getting Started page — full onboarding without visiting Settings
 - "Reconnect with Strava" button on Settings page when already connected (was hidden)
