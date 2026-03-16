@@ -112,6 +112,14 @@ function wpgraphql_strava_init(): void {
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/graphql.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/rest-api.php';
 	require_once WPGRAPHQL_STRAVA_DIR . 'includes/shortcodes.php';
+	require_once WPGRAPHQL_STRAVA_DIR . 'includes/cli.php';
+	require_once WPGRAPHQL_STRAVA_DIR . 'includes/privacy.php';
+	require_once WPGRAPHQL_STRAVA_DIR . 'includes/webhook.php';
+
+	// Gutenberg block.
+	if ( function_exists( 'register_block_type' ) ) {
+		register_block_type( WPGRAPHQL_STRAVA_DIR . 'blocks/strava-activities' );
+	}
 }
 
 add_action( 'plugins_loaded', 'wpgraphql_strava_init' );

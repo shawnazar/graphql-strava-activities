@@ -1,0 +1,35 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wpgraphql-strava/activities",
+	"version": "0.1.0",
+	"title": "Strava Activities",
+	"category": "widgets",
+	"icon": "chart-line",
+	"description": "Display your Strava activities with route maps.",
+	"textdomain": "graphql-strava-activities",
+	"attributes": {
+		"shortcode": {
+			"type": "string",
+			"default": "strava_activities"
+		},
+		"count": {
+			"type": "number",
+			"default": 10
+		},
+		"type": {
+			"type": "string",
+			"default": ""
+		},
+		"index": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": true
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

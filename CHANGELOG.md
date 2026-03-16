@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `.pot` file generation via `composer make-pot` for internationalization
+- `wp strava sync` and `wp strava status` WP-CLI commands
+- Gutenberg block (`wpgraphql-strava/activities`) with live preview and settings panel
+- Strava webhook endpoint (`/wp-json/wpgraphql-strava/v1/webhook`) for real-time activity updates
+- GDPR privacy hooks — personal data exporter, eraser, and privacy policy suggestion
+- Dark mode SVG route maps via `prefers-color-scheme: dark` CSS media query
+- `wpgraphql_strava_svg_dark_color` filter (default `#60d4c8`)
+- Activity type icons (dashicons) in admin Activities list table
+- `wpgraphql_strava_activity_icon` filter for custom icon mapping
+- CSV export button on Activities admin page
+- WordPress multisite verified — per-site credentials and cron (no code changes needed)
+
 ## [0.1.3] - 2026-03-16
 
 ### Fixed

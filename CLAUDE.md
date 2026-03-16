@@ -40,6 +40,9 @@ includes/
 ├── rest-api.php               # REST API endpoint (/wp-json/wpgraphql-strava/v1/activities)
 ├── shortcodes.php             # WordPress shortcodes for non-headless sites
 ├── updater.php                # Self-hosted update checker via GitHub Releases API
+├── cli.php                    # WP-CLI commands (sync, status)
+├── privacy.php                # GDPR personal data exporter and eraser
+├── webhook.php                # Strava webhook endpoint for real-time updates
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 

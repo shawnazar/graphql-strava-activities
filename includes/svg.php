@@ -34,7 +34,8 @@ function wpgraphql_strava_allowed_svg_tags(): array {
 			'class'    => true,
 			'style'    => true,
 		],
-		'path' => [
+		'style' => [],
+		'path'  => [
 			'd'               => true,
 			'fill'            => true,
 			'stroke'          => true,
@@ -89,6 +90,13 @@ function wpgraphql_strava_polyline_to_svg(
 
 	/** This filter is documented in includes/svg.php */
 	$stroke_width = (float) apply_filters( 'wpgraphql_strava_svg_stroke_width', $stroke_width );
+
+	/**
+	 * Filters the SVG stroke colour used in dark mode (prefers-color-scheme: dark).
+	 *
+	 * @param string $dark_color Dark mode stroke colour.
+	 */
+	$dark_color = (string) apply_filters( 'wpgraphql_strava_svg_dark_color', '#60d4c8' );
 
 	// Extract coordinate bounds.
 	$lats = array_column( $points, 0 );
@@ -145,7 +153,8 @@ function wpgraphql_strava_polyline_to_svg(
 
 	return sprintf(
 		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %1$d %2$d" width="%1$d" height="%2$d" role="img" aria-label="%3$s"%4$s>'
-		. '<path d="%5$s" fill="none" stroke="%6$s" stroke-width="%7$s" stroke-linecap="round" stroke-linejoin="round"/>'
+		. '<style>path{stroke:%6$s}@media(prefers-color-scheme:dark){path{stroke:%8$s}}</style>'
+		. '<path d="%5$s" fill="none" stroke-width="%7$s" stroke-linecap="round" stroke-linejoin="round"/>'
 		. '</svg>',
 		$width,
 		$height,
@@ -153,6 +162,7 @@ function wpgraphql_strava_polyline_to_svg(
 		$attrs_str,
 		esc_attr( $path_data ),
 		esc_attr( $stroke_color ),
-		esc_attr( (string) $stroke_width )
+		esc_attr( (string) $stroke_width ),
+		esc_attr( $dark_color )
 	);
 }

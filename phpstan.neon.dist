@@ -9,6 +9,7 @@ parameters:
     excludePaths:
         - vendor/
         - tests/
+        - includes/cli.php
     bootstrapFiles:
         - vendor/autoload.php
     stubFiles:

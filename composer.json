@@ -41,6 +41,7 @@
     "test": "phpunit",
     "test:unit": "phpunit --testsuite unit",
     "test:integration": "phpunit --testsuite integration",
-    "analyse": "phpstan analyse"
+    "analyse": "phpstan analyse",
+    "make-pot": "wp i18n make-pot . languages/graphql-strava-activities.pot --exclude=vendor,tests,node_modules,docs"
   }
 }

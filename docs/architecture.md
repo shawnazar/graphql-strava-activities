@@ -16,6 +16,9 @@ includes/
 ├── rest-api.php               # REST API endpoint (/wp-json/wpgraphql-strava/v1/activities)
 ├── shortcodes.php             # WordPress shortcodes + classic editor generator button
 ├── updater.php                # Self-hosted update checker via GitHub Releases API
+├── cli.php                    # WP-CLI commands (sync, status)
+├── privacy.php                # GDPR personal data exporter and eraser
+├── webhook.php                # Strava webhook endpoint for real-time updates
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 
@@ -33,8 +36,11 @@ Load order matters — `encryption.php` and `polyline.php` must load before modu
 8. `graphql.php` — WPGraphQL type registration (22 fields)
 9. `rest-api.php` — REST API endpoint registration
 10. `shortcodes.php` — WordPress shortcodes + editor generator button
-11. `class-wpgraphql-strava-activities-list-table.php` — loaded by admin.php when needed
-12. `updater.php` — loaded independently of WPGraphQL (always active)
+11. `cli.php` — WP-CLI commands (loaded only when WP_CLI is active)
+12. `privacy.php` — GDPR data exporter, eraser, and privacy policy
+13. `webhook.php` — Strava webhook endpoint for real-time updates
+14. `class-wpgraphql-strava-activities-list-table.php` — loaded by admin.php when needed
+15. `updater.php` — loaded independently of WPGraphQL (always active)
 
 ## Data Flow
 

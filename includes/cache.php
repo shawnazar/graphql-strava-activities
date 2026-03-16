@@ -15,6 +15,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get a dashicon class for a Strava activity type.
+ *
+ * @param string $type Strava activity type.
+ * @return string Dashicon CSS class.
+ */
+function wpgraphql_strava_activity_icon( string $type ): string {
+	$map = [
+		'Ride'           => 'dashicons-bike',
+		'VirtualRide'    => 'dashicons-bike',
+		'EBikeRide'      => 'dashicons-bike',
+		'Run'            => 'dashicons-universal-access-alt',
+		'VirtualRun'     => 'dashicons-universal-access-alt',
+		'Walk'           => 'dashicons-universal-access-alt',
+		'Hike'           => 'dashicons-location-alt',
+		'Swim'           => 'dashicons-palmtree',
+		'WeightTraining' => 'dashicons-superhero',
+		'Yoga'           => 'dashicons-heart',
+		'Workout'        => 'dashicons-superhero',
+	];
+
+	/**
+	 * Filters the icon class for a Strava activity type.
+	 *
+	 * @param string $icon Dashicon CSS class.
+	 * @param string $type Activity type.
+	 */
+	return (string) apply_filters(
+		'wpgraphql_strava_activity_icon',
+		$map[ $type ] ?? 'dashicons-chart-line',
+		$type
+	);
+}
+
+/**
  * Transient key for cached activities.
  *
  * @var string

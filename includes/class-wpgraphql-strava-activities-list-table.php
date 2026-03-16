@@ -161,7 +161,10 @@ class WPGRAPHQL_Strava_Activities_List_Table extends WP_List_Table {
 	 * @return string Cell content.
 	 */
 	public function column_title( array $item ): string {
-		$title = esc_html( $item['title'] ?? '' );
+		$type  = $item['type'] ?? '';
+		$icon  = wpgraphql_strava_activity_icon( $type );
+		$title = '<span class="dashicons ' . esc_attr( $icon ) . '" style="font-size:16px;width:16px;height:16px;margin-right:4px;vertical-align:middle;color:#6b7280;"></span>';
+		$title .= esc_html( $item['title'] ?? '' );
 
 		if ( ! empty( $item['isPrivate'] ) ) {
 			$title .= ' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:1px 6px;border-radius:9999px;">' . esc_html__( 'Private', 'graphql-strava-activities' ) . '</span>';

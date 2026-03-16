@@ -102,13 +102,13 @@ class SvgTest extends TestCase {
     public function test_svg_uses_default_stroke_color(): void {
         $svg = wpgraphql_strava_polyline_to_svg( 'o~l~Fv}naSqAmBwCcA{BjA_CxBoAvC' );
 
-        $this->assertStringContainsString( 'stroke="#0d9488"', $svg );
+        $this->assertStringContainsString( 'stroke:#0d9488', $svg );
     }
 
     public function test_svg_uses_custom_stroke_color(): void {
         $svg = wpgraphql_strava_polyline_to_svg( 'o~l~Fv}naSqAmBwCcA{BjA_CxBoAvC', 300, 200, '#ff0000' );
 
-        $this->assertStringContainsString( 'stroke="#ff0000"', $svg );
+        $this->assertStringContainsString( 'stroke:#ff0000', $svg );
     }
 
     public function test_svg_has_accessibility_attributes(): void {

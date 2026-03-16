@@ -19,6 +19,72 @@ add_action( 'admin_init', 'wpgraphql_strava_register_settings' );
 add_action( 'admin_init', 'wpgraphql_strava_handle_resync' );
 add_action( 'admin_init', 'wpgraphql_strava_intercept_oauth_redirect' );
 add_action( 'admin_init', 'wpgraphql_strava_handle_quick_setup' );
+add_action( 'admin_init', 'wpgraphql_strava_handle_csv_export' );
+
+/**
+ * Handle CSV export of cached activities.
+ *
+ * @return void
+ */
+function wpgraphql_strava_handle_csv_export(): void {
+	if (
+		! isset( $_GET['wpgraphql_strava_export_csv'] )
+		|| ! isset( $_GET['_wpnonce'] )
+		|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wpgraphql_strava_export_csv' )
+		|| ! current_user_can( 'manage_options' )
+	) {
+		return;
+	}
+
+	$activities = wpgraphql_strava_get_cached_activities( 0 );
+
+	$filename = 'strava-activities-' . wp_date( 'Y-m-d' ) . '.csv';
+
+	header( 'Content-Type: text/csv; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( 'Pragma: no-cache' );
+	header( 'Expires: 0' );
+
+	$output = fopen( 'php://output', 'w' );
+	if ( false === $output ) {
+		return;
+	}
+
+	// Header row.
+	// Header row.
+	$headers = [ 'Title', 'Type', 'Distance', 'Unit', 'Duration', 'Date', 'Elevation Gain', 'Avg Speed', 'Max Speed', 'Speed Unit', 'Avg HR', 'Max HR', 'Calories', 'Kudos', 'Comments', 'City', 'Country', 'Private', 'Strava URL' ];
+	fputcsv( $output, $headers );
+
+	foreach ( $activities as $activity ) {
+		fputcsv(
+			$output,
+			[
+				$activity['title'] ?? '',
+				$activity['type'] ?? '',
+				$activity['distance'] ?? '',
+				$activity['unit'] ?? '',
+				$activity['duration'] ?? '',
+				$activity['date'] ?? '',
+				$activity['elevationGain'] ?? '',
+				$activity['averageSpeed'] ?? '',
+				$activity['maxSpeed'] ?? '',
+				$activity['speedUnit'] ?? '',
+				$activity['averageHeartrate'] ?? '',
+				$activity['maxHeartrate'] ?? '',
+				$activity['calories'] ?? '',
+				$activity['kudosCount'] ?? '',
+				$activity['commentCount'] ?? '',
+				$activity['city'] ?? '',
+				$activity['country'] ?? '',
+				! empty( $activity['isPrivate'] ) ? 'Yes' : 'No',
+				$activity['stravaUrl'] ?? '',
+			]
+		);
+	}
+
+	fclose( $output );
+	exit;
+}
 
 /**
  * Handle the quick setup form on the Getting Started page.
@@ -1723,6 +1789,12 @@ function wpgraphql_strava_render_activities_page(): void {
 			);
 			?>
 		</span>
+
+		<?php if ( (int) $total > 0 ) : ?>
+			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpgraphql-strava-activities&wpgraphql_strava_export_csv=1' ), 'wpgraphql_strava_export_csv' ) ); ?>" class="page-title-action">
+				<?php esc_html_e( 'Export CSV', 'graphql-strava-activities' ); ?>
+			</a>
+		<?php endif; ?>
 
 		<hr class="wp-header-end" />
 
