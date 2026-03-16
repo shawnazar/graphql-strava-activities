@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-16
+
 ### Fixed
 - Strava button SVG 404 — use `WPGRAPHQL_STRAVA_DIR` for `plugins_url()` instead of `dirname(__DIR__)`
 
