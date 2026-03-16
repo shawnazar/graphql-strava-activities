@@ -18,6 +18,56 @@ add_action( 'admin_menu', 'wpgraphql_strava_add_admin_menu' );
 add_action( 'admin_init', 'wpgraphql_strava_register_settings' );
 add_action( 'admin_init', 'wpgraphql_strava_handle_resync' );
 add_action( 'admin_init', 'wpgraphql_strava_intercept_oauth_redirect' );
+add_action( 'admin_init', 'wpgraphql_strava_handle_quick_setup' );
+
+/**
+ * Handle the quick setup form on the Getting Started page.
+ *
+ * Saves Client ID and Client Secret so the OAuth button becomes available
+ * without requiring the user to visit the full Settings page.
+ *
+ * @return void
+ */
+function wpgraphql_strava_handle_quick_setup(): void {
+	if (
+		! isset( $_POST['wpgraphql_strava_quick_setup'] )
+		|| ! check_admin_referer( 'wpgraphql_strava_quick_setup', 'wpgraphql_strava_quick_setup_nonce' )
+		|| ! current_user_can( 'manage_options' )
+	) {
+		return;
+	}
+
+	$client_id     = isset( $_POST['wpgraphql_strava_client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['wpgraphql_strava_client_id'] ) ) : '';
+	$client_secret = isset( $_POST['wpgraphql_strava_client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['wpgraphql_strava_client_secret'] ) ) : '';
+
+	if ( empty( $client_id ) || empty( $client_secret ) ) {
+		set_transient(
+			'wpgraphql_strava_admin_notice',
+			[
+				'type'    => 'error',
+				'message' => __( 'Both Client ID and Client Secret are required.', 'graphql-strava-activities' ),
+			],
+			30
+		);
+		wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava' ) );
+		exit;
+	}
+
+	update_option( 'wpgraphql_strava_client_id', $client_id );
+	wpgraphql_strava_update_option( 'wpgraphql_strava_client_secret', $client_secret );
+
+	set_transient(
+		'wpgraphql_strava_admin_notice',
+		[
+			'type'    => 'success',
+			'message' => __( 'Credentials saved! Click "Connect with Strava" below to authorize.', 'graphql-strava-activities' ),
+		],
+		30
+	);
+
+	wp_safe_redirect( admin_url( 'admin.php?page=wpgraphql-strava' ) );
+	exit;
+}
 
 /**
  * Intercept the Strava OAuth redirect on the settings page.
@@ -1006,9 +1056,21 @@ function wpgraphql_strava_render_guide_page(): void {
 	}
 
 	$settings_url = admin_url( 'admin.php?page=wpgraphql-strava-settings' );
+
+	// Flash notice (from quick setup form).
+	$notice = get_transient( 'wpgraphql_strava_admin_notice' );
+	if ( is_array( $notice ) ) {
+		delete_transient( 'wpgraphql_strava_admin_notice' );
+	}
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Getting Started with GraphQL Strava Activities', 'graphql-strava-activities' ); ?></h1>
+
+		<?php if ( is_array( $notice ) ) : ?>
+			<div class="notice notice-<?php echo 'success' === $notice['type'] ? 'success' : 'error'; ?> is-dismissible">
+				<p><?php echo esc_html( $notice['message'] ); ?></p>
+			</div>
+		<?php endif; ?>
 
 		<div style="max-width: 800px;">
 
@@ -1025,15 +1087,7 @@ function wpgraphql_strava_render_guide_page(): void {
 						);
 						?>
 					</li>
-					<li>
-						<?php
-						printf(
-							/* translators: %s: Link to plugin settings page */
-							esc_html__( 'Enter your Client ID and Client Secret on the %s page and click Save.', 'graphql-strava-activities' ),
-							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'graphql-strava-activities' ) . '</a>'
-						);
-						?>
-					</li>
+					<li><?php esc_html_e( 'Enter your Client ID and Client Secret below and click "Save & Continue".', 'graphql-strava-activities' ); ?></li>
 					<li><?php esc_html_e( 'Click "Connect with Strava" to authorize — your tokens will be fetched automatically and activities synced.', 'graphql-strava-activities' ); ?></li>
 					<li><?php esc_html_e( 'Query your activities via GraphQL — see examples below.', 'graphql-strava-activities' ); ?></li>
 				</ol>
@@ -1054,7 +1108,7 @@ function wpgraphql_strava_render_guide_page(): void {
 						<?php esc_html_e( 'You are connected to Strava. Tokens are stored and will refresh automatically.', 'graphql-strava-activities' ); ?>
 					</p>
 				<?php elseif ( ! empty( $guide_oauth_url ) ) : ?>
-					<p><?php esc_html_e( 'Save your Client ID and Client Secret on the Settings page, then click below to authorize:', 'graphql-strava-activities' ); ?></p>
+					<p><?php esc_html_e( 'Your credentials are saved. Click below to authorize:', 'graphql-strava-activities' ); ?></p>
 					<a href="<?php echo esc_url( $guide_oauth_url ); ?>">
 						<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
 							alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
@@ -1065,14 +1119,36 @@ function wpgraphql_strava_render_guide_page(): void {
 						<code><?php echo esc_html( wp_parse_url( admin_url(), PHP_URL_HOST ) ); ?></code>
 					</p>
 				<?php else : ?>
-					<p>
-						<?php
-						printf(
-							/* translators: %s: Link to settings page */
-							esc_html__( 'First, enter your Client ID on the %s page.', 'graphql-strava-activities' ),
-							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'graphql-strava-activities' ) . '</a>'
-						);
-						?>
+					<p><?php esc_html_e( 'Enter your Strava API credentials to get started:', 'graphql-strava-activities' ); ?></p>
+					<form method="post" style="margin: 12px 0;">
+						<?php wp_nonce_field( 'wpgraphql_strava_quick_setup', 'wpgraphql_strava_quick_setup_nonce' ); ?>
+						<input type="hidden" name="wpgraphql_strava_quick_setup" value="1" />
+						<table class="form-table" role="presentation" style="margin: 0;">
+							<tr>
+								<th scope="row" style="padding: 8px 10px 8px 0; width: 120px;">
+									<label for="quick-client-id"><?php esc_html_e( 'Client ID', 'graphql-strava-activities' ); ?></label>
+								</th>
+								<td style="padding: 8px 0;">
+									<input type="text" id="quick-client-id" name="wpgraphql_strava_client_id"
+										value="<?php echo esc_attr( get_option( 'wpgraphql_strava_client_id', '' ) ); ?>"
+										class="regular-text" required />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row" style="padding: 8px 10px 8px 0;">
+									<label for="quick-client-secret"><?php esc_html_e( 'Client Secret', 'graphql-strava-activities' ); ?></label>
+								</th>
+								<td style="padding: 8px 0;">
+									<input type="password" id="quick-client-secret" name="wpgraphql_strava_client_secret"
+										class="regular-text" required />
+								</td>
+							</tr>
+						</table>
+						<?php submit_button( __( 'Save & Continue', 'graphql-strava-activities' ), 'primary', 'submit', false ); ?>
+					</form>
+					<p style="font-size: 13px; color: #646970;">
+						<?php esc_html_e( 'Your Strava API application\'s "Authorization Callback Domain" must be set to:', 'graphql-strava-activities' ); ?>
+						<code><?php echo esc_html( wp_parse_url( admin_url(), PHP_URL_HOST ) ); ?></code>
 					</p>
 				<?php endif; ?>
 
