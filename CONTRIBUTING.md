@@ -55,6 +55,11 @@ This project uses [WordPress Coding Standards](https://developer.wordpress.org/c
 ```bash
 composer lint         # Check for violations
 composer lint:fix     # Auto-fix what's possible
+composer analyse      # PHPStan level 5
+composer test         # Run all tests
+composer make-pot     # Generate translation POT file
+wp strava sync        # Sync activities (WP-CLI)
+wp strava status      # Check connection (WP-CLI)
 ```
 
 ## Security

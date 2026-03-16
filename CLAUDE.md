@@ -144,6 +144,8 @@ All filters use the `wpgraphql_strava_` prefix:
 | `wpgraphql_strava_activities` | — | Filter activities before caching |
 | `wpgraphql_strava_activity_types` | `[]` (all) | Whitelist of allowed types |
 | `wpgraphql_strava_activities_to_fetch` | `200` | Max activities to sync (clamped to 200) |
+| `wpgraphql_strava_svg_dark_color` | `#60d4c8` | SVG stroke colour in dark mode |
+| `wpgraphql_strava_activity_icon` | — | Dashicon class for activity type |
 
 ## Releasing
 
@@ -162,6 +164,14 @@ composer analyse      # Run PHPStan static analysis (level 5)
 composer test         # Run all tests
 composer test:unit    # Run unit tests only
 composer test:integration  # Run integration tests only
+composer make-pot    # Generate translation POT file
+```
+
+### WP-CLI Commands
+
+```bash
+wp strava sync [--force]   # Sync activities (--force clears cache first)
+wp strava status           # Show connection status and sync info
 ```
 
 No build step — pure PHP plugin.

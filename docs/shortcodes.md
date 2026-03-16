@@ -1,6 +1,21 @@
-# Shortcodes
+# Shortcodes & Block
 
-For non-headless WordPress sites, the plugin provides 5 shortcodes to display Strava data in posts and pages.
+For non-headless WordPress sites, the plugin provides 5 shortcodes and a Gutenberg block to display Strava data in posts and pages.
+
+## Gutenberg Block
+
+The **Strava Activities** block is available in the block editor inserter. It provides a settings panel for:
+
+- **Display mode** — Activity list, single activity, route map, stats, or latest activity
+- **Count** — Number of activities (for activity list)
+- **Type** — Filter by activity type
+- **Index** — Activity index (for single activity or map)
+
+The block shows a live preview in the editor using server-side rendering.
+
+## Shortcode Generator
+
+In the classic editor, click the **Strava** button next to "Add Media" to open the shortcode generator modal. Select a shortcode, configure attributes, and insert with one click.
 
 ## Available Shortcodes
 

@@ -40,6 +40,17 @@ add_filter( 'wpgraphql_strava_svg_attributes', function ( $attrs ) {
 } );
 ```
 
+### Dark Mode
+
+SVG maps automatically adapt to the user's system preference using `prefers-color-scheme: dark`. The map uses a lighter stroke colour in dark mode.
+
+```php
+// Customize dark mode colour (default: #60d4c8)
+add_filter( 'wpgraphql_strava_svg_dark_color', function () {
+    return '#1dd1a1';
+} );
+```
+
 ### Shortcode Parameters
 
 The `[strava_map]` shortcode supports per-map overrides:

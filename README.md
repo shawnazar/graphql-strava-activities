@@ -19,7 +19,13 @@ Compatible with Strava — a WordPress plugin that extends [WPGraphQL](https://w
 - **Activity Photos** — Primary photo fetching for your activities
 - **Caching** — Transient-based with configurable TTL and sync frequency
 - **Credential Encryption** — Optional AES-256-CBC at-rest encryption
+- **Gutenberg Block** — Native block editor support with live preview
 - **Shortcode Generator** — Classic editor button for inserting Strava shortcodes
+- **WP-CLI** — `wp strava sync` and `wp strava status` commands
+- **Webhooks** — Real-time Strava webhook integration for instant updates
+- **Dark Mode** — SVG maps adapt to system dark mode preference automatically
+- **GDPR Compliance** — Personal data export and erasure hooks
+- **CSV Export** — Download cached activities from the admin page
 - **Extensible** — Filters for cache TTL, SVG appearance, activity types, sync hooks, and more
 
 ## Requirements
@@ -94,6 +100,8 @@ All filters use the `wpgraphql_strava_` prefix:
 | `wpgraphql_strava_activities` | — | Filter activities before caching |
 | `wpgraphql_strava_activity_types` | `[]` (all) | Whitelist of allowed types |
 | `wpgraphql_strava_activities_to_fetch` | `200` | Max activities to sync |
+| `wpgraphql_strava_svg_dark_color` | `#60d4c8` | SVG stroke colour in dark mode |
+| `wpgraphql_strava_activity_icon` | — | Dashicon class for activity type |
 
 ```php
 // Example: only show rides and runs
@@ -124,12 +132,21 @@ define( 'WPGRAPHQL_STRAVA_ENCRYPTION_KEY', 'your-64-char-hex-key' );
 
 Generate a key: `wp eval "echo bin2hex(random_bytes(32));"`
 
+## WP-CLI Commands
+
+```bash
+wp strava sync              # Sync activities from Strava
+wp strava sync --force      # Clear cache and sync
+wp strava status            # Show connection and sync status
+```
+
 ## Development
 
 ```bash
 composer install      # Install dev dependencies (WPCS)
 composer lint         # Check coding standards
 composer lint:fix     # Auto-fix violations
+composer make-pot     # Generate translation POT file
 ```
 
 No build step — pure PHP.

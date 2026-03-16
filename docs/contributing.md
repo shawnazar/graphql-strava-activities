@@ -36,6 +36,9 @@ composer analyse          # PHPStan level 5 static analysis
 composer test             # Run all tests
 composer test:unit        # Unit tests only
 composer test:integration # Integration tests only
+composer make-pot         # Generate translation POT file
+wp strava sync [--force]  # Sync activities (WP-CLI)
+wp strava status          # Connection status (WP-CLI)
 ```
 
 ## Pre-commit Hooks

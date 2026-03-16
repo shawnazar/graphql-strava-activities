@@ -124,6 +124,41 @@ add_filter( 'wpgraphql_strava_activities_to_fetch', function () {
 } );
 ```
 
+### `wpgraphql_strava_svg_dark_color`
+
+SVG route map stroke colour for dark mode (`prefers-color-scheme: dark`).
+
+| | |
+|---|---|
+| **Default** | `#60d4c8` |
+| **Location** | `svg.php` |
+| **Parameter** | `string $dark_color` |
+
+```php
+add_filter( 'wpgraphql_strava_svg_dark_color', function () {
+    return '#1dd1a1'; // Custom dark teal
+} );
+```
+
+### `wpgraphql_strava_activity_icon`
+
+Dashicon CSS class for an activity type in the admin Activities list.
+
+| | |
+|---|---|
+| **Default** | Mapped by type (e.g. `dashicons-bike` for Ride) |
+| **Location** | `cache.php` |
+| **Parameters** | `string $icon` (Dashicon class), `string $type` (Activity type) |
+
+```php
+add_filter( 'wpgraphql_strava_activity_icon', function ( $icon, $type ) {
+    if ( 'Hike' === $type ) {
+        return 'dashicons-location';
+    }
+    return $icon;
+}, 10, 2 );
+```
+
 ## Action Hooks
 
 ### `wpgraphql_strava_before_sync`
@@ -153,6 +188,23 @@ Fires after activities have been fetched, processed, and cached.
 ```php
 add_action( 'wpgraphql_strava_after_sync', function ( $activities, $raw_count ) {
     error_log( "Synced $raw_count activities, cached " . count( $activities ) );
+}, 10, 2 );
+```
+
+### `wpgraphql_strava_webhook_event`
+
+Fires when a Strava webhook event triggers a cache clear.
+
+| | |
+|---|---|
+| **Location** | `webhook.php` |
+| **Parameters** | `string $aspect_type` (create/update/delete), `array $body` (full webhook payload) |
+
+```php
+add_action( 'wpgraphql_strava_webhook_event', function ( $aspect_type, $body ) {
+    if ( 'create' === $aspect_type ) {
+        // Notify on new activity
+    }
 }, 10, 2 );
 ```
 

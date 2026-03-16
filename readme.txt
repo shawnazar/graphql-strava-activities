@@ -29,6 +29,14 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
 * **Admin Settings** — Full settings page for credentials, SVG customization, display units, and sync controls.
 * **Credential Encryption** — Optional AES-256-CBC at-rest encryption for your API tokens.
 * **Configurable Sync** — Choose from 11 sync frequencies: every 15 minutes to monthly.
+* **One-Click OAuth** — "Connect with Strava" button handles the full token exchange.
+* **Gutenberg Block** — Native block editor support with live preview.
+* **REST API** — JSON endpoint for non-GraphQL frontends.
+* **WP-CLI** — `wp strava sync` and `wp strava status` commands.
+* **Webhooks** — Real-time Strava webhook support for instant updates.
+* **Dark Mode** — SVG maps adapt to system dark mode preference.
+* **GDPR** — Personal data export and erasure hooks for privacy compliance.
+* **CSV Export** — Download activities from the admin page.
 * **Extensible** — Filters and hooks for customizing cache TTL, SVG appearance, activity types, and more.
 
 **Example GraphQL Query:**
@@ -111,6 +119,22 @@ All Strava activity types (Ride, Run, Walk, Hike, Swim, etc.) are supported. You
 = Does this work with any headless frontend? =
 
 Yes. Any frontend that can query WPGraphQL (Next.js, Gatsby, Astro, etc.) will work.
+
+= Can I use this with the block editor? =
+
+Yes. A Gutenberg block called "Strava Activities" is available in the block inserter with live preview and attribute controls.
+
+= Does this support dark mode? =
+
+Yes. SVG route maps automatically detect system dark mode preference and apply a lighter stroke colour. Customize via the `wpgraphql_strava_svg_dark_color` filter.
+
+= How do I sync from the command line? =
+
+Use `wp strava sync` (with optional `--force` flag) and `wp strava status` via WP-CLI.
+
+= How do I export my activities? =
+
+Click "Export CSV" on the Activities admin page to download all cached activities.
 
 == Screenshots ==
 

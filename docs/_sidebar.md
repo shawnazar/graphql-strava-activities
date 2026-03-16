@@ -5,7 +5,7 @@
   - [Activity Fields](fields.md)
   - [Admin Settings](settings.md)
   - [SVG Route Maps](svg-maps.md)
-  - [Shortcodes](shortcodes.md)
+  - [Shortcodes & Block](shortcodes.md)
   - [Encryption](encryption.md)
   - [FAQ](faq.md)
 
