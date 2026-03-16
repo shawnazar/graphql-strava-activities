@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Upgraded `github/codeql-action` from v3 to v4 (Node.js 24 support)
+- Set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment variable in CI
+- Release workflow uses `RELEASE_PAT` for proper CI triggering on release PRs and tags
+- Stale release branch cleanup on workflow retry
+
 ## [0.1.0] - 2026-03-15
 
 Initial public release.
