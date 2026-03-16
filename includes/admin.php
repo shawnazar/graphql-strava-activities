@@ -952,7 +952,7 @@ function wpgraphql_strava_render_admin_page(): void {
 					<p><?php esc_html_e( 'Save your Client ID and Client Secret above, then click the button below to authorize. Tokens will be fetched automatically.', 'graphql-strava-activities' ); ?></p>
 				<?php endif; ?>
 				<a href="<?php echo esc_url( $oauth_url ); ?>">
-					<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
+					<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', WPGRAPHQL_STRAVA_DIR . 'graphql-strava-activities.php' ) ); ?>"
 						alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
 						style="height: 48px;" />
 				</a>
@@ -1110,7 +1110,7 @@ function wpgraphql_strava_render_guide_page(): void {
 				<?php elseif ( ! empty( $guide_oauth_url ) ) : ?>
 					<p><?php esc_html_e( 'Your credentials are saved. Click below to authorize:', 'graphql-strava-activities' ); ?></p>
 					<a href="<?php echo esc_url( $guide_oauth_url ); ?>">
-						<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', dirname( __DIR__ ) ) ); ?>"
+						<img src="<?php echo esc_url( plugins_url( 'assets/btn-strava-connectwith-orange.svg', WPGRAPHQL_STRAVA_DIR . 'graphql-strava-activities.php' ) ); ?>"
 							alt="<?php esc_attr_e( 'Connect with Strava', 'graphql-strava-activities' ); ?>"
 							style="height: 48px; margin: 8px 0; display: block;" />
 					</a>
