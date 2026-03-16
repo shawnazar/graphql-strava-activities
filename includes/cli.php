@@ -39,7 +39,7 @@ class WPGRAPHQL_Strava_CLI_Command {
 	 */
 	public function sync( array $args, array $assoc_args ): void {
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'force', false ) ) {
-			delete_transient( 'wpgraphql_strava_activities' );
+			wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 			\WP_CLI::log( 'Cache cleared.' );
 		}
 

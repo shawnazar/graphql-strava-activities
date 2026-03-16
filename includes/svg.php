@@ -42,6 +42,8 @@ function wpgraphql_strava_allowed_svg_tags(): array {
 			'stroke-width'    => true,
 			'stroke-linecap'  => true,
 			'stroke-linejoin' => true,
+			'class'           => true,
+			'opacity'         => true,
 		],
 	];
 }
@@ -164,5 +166,108 @@ function wpgraphql_strava_polyline_to_svg(
 		esc_attr( $stroke_color ),
 		esc_attr( (string) $stroke_width ),
 		esc_attr( $dark_color )
+	);
+}
+
+/**
+ * Generate an elevation profile SVG from decoded polyline points.
+ *
+ * Uses latitude changes as a proxy for elevation variation when actual
+ * elevation data is not available per-point. The result is a stylised
+ * area chart.
+ *
+ * @param string $polyline       Encoded polyline string.
+ * @param float  $elevation_gain Total elevation gain in metres (from Strava).
+ * @param int    $width          SVG width in pixels.
+ * @param int    $height         SVG height in pixels.
+ * @return string SVG markup, or empty string if insufficient data.
+ */
+function wpgraphql_strava_elevation_profile_svg(
+	string $polyline,
+	float $elevation_gain = 0.0,
+	int $width = 300,
+	int $height = 80
+): string {
+	$points = wpgraphql_strava_decode_polyline( $polyline );
+
+	if ( count( $points ) < 3 || $elevation_gain <= 0.0 ) {
+		return '';
+	}
+
+	// Calculate cumulative distance and use lat deltas as elevation proxy.
+	$distances   = [ 0.0 ];
+	$elevations  = [ 0.0 ];
+	$total_dist  = 0.0;
+	$total_climb = 0.0;
+
+	for ( $i = 1, $count = count( $points ); $i < $count; $i++ ) {
+		$dlat = $points[ $i ][0] - $points[ $i - 1 ][0];
+		$dlng = $points[ $i ][1] - $points[ $i - 1 ][1];
+		$dist = sqrt( $dlat * $dlat + $dlng * $dlng );
+
+		$total_dist    += $dist;
+		$distances[]    = $total_dist;
+		$total_climb   += abs( $dlat );
+		$elevations[]   = $elevations[ $i - 1 ] + $dlat;
+	}
+
+	if ( $total_dist <= 0.0 ) {
+		return '';
+	}
+
+	// Normalise elevation to match the real elevation gain.
+	$scale     = $total_climb > 0.0 ? $elevation_gain / $total_climb : 1.0;
+	$min_elev  = PHP_FLOAT_MAX;
+	$max_elev  = PHP_FLOAT_MIN;
+
+	foreach ( $elevations as &$e ) {
+		$e *= $scale;
+		$min_elev = min( $min_elev, $e );
+		$max_elev = max( $max_elev, $e );
+	}
+	unset( $e );
+
+	$elev_range = $max_elev - $min_elev;
+	if ( $elev_range <= 0.0 ) {
+		$elev_range = 1.0;
+	}
+
+	$padding    = 0.05;
+	$draw_w     = $width * ( 1 - 2 * $padding );
+	$draw_h     = $height * ( 1 - 2 * $padding );
+	$offset_x   = $width * $padding;
+	$offset_y   = $height * $padding;
+
+	// Build path.
+	$path_points = [];
+	for ( $i = 0, $count = count( $distances ); $i < $count; $i++ ) {
+		$x = $offset_x + ( $distances[ $i ] / $total_dist ) * $draw_w;
+		$y = $offset_y + ( 1 - ( $elevations[ $i ] - $min_elev ) / $elev_range ) * $draw_h;
+		$path_points[] = round( $x, 1 ) . ',' . round( $y, 1 );
+	}
+
+	// Area path: line across top, then close to bottom.
+	$line_path = 'M' . implode( 'L', $path_points );
+	$area_path = $line_path
+		. 'L' . round( $offset_x + $draw_w, 1 ) . ',' . round( $offset_y + $draw_h, 1 )
+		. 'L' . round( $offset_x, 1 ) . ',' . round( $offset_y + $draw_h, 1 ) . 'Z';
+
+	$stroke_color = (string) apply_filters( 'wpgraphql_strava_svg_color', get_option( 'wpgraphql_strava_svg_color', '#0d9488' ) );
+	$dark_color   = (string) apply_filters( 'wpgraphql_strava_svg_dark_color', '#60d4c8' );
+
+	return sprintf(
+		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %1$d %2$d" width="%1$d" height="%2$d" role="img" aria-label="%3$s">'
+		. '<style>.ep-fill{fill:%4$s;opacity:0.2}.ep-line{stroke:%4$s;fill:none;stroke-width:1.5}'
+		. '@media(prefers-color-scheme:dark){.ep-fill{fill:%5$s}.ep-line{stroke:%5$s}}</style>'
+		. '<path class="ep-fill" d="%6$s"/>'
+		. '<path class="ep-line" d="%7$s" stroke-linecap="round" stroke-linejoin="round"/>'
+		. '</svg>',
+		$width,
+		$height,
+		esc_attr__( 'Elevation profile', 'graphql-strava-activities' ),
+		esc_attr( $stroke_color ),
+		esc_attr( $dark_color ),
+		esc_attr( $area_path ),
+		esc_attr( $line_path )
 	);
 }

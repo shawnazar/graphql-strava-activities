@@ -51,6 +51,10 @@ function wpgraphql_strava_register_types(): void {
 					'type'        => 'String',
 					'description' => __( 'URL to the activity on Strava.', 'graphql-strava-activities' ),
 				],
+				'elevationProfileSvg' => [
+					'type'        => 'String',
+					'description' => __( 'Inline SVG elevation profile chart.', 'graphql-strava-activities' ),
+				],
 				'type'      => [
 					'type'        => 'String',
 					'description' => __( 'Activity type (Ride, Run, Walk, etc.).', 'graphql-strava-activities' ),

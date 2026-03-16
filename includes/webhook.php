@@ -94,12 +94,26 @@ function wpgraphql_strava_webhook_event( \WP_REST_Request $request ): \WP_REST_R
 		return new \WP_REST_Response( [ 'status' => 'ignored' ], 200 );
 	}
 
-	// Clear cache on create, update, or delete.
+	$object_id = (int) ( $body['object_id'] ?? 0 );
+
+	// Handle activity events with partial cache updates.
 	if ( in_array( $aspect_type, [ 'create', 'update', 'delete' ], true ) ) {
-		delete_transient( 'wpgraphql_strava_activities' );
+		$cached = wpgraphql_strava_cache_get( WPGRAPHQL_STRAVA_CACHE_KEY );
+
+		if ( 'delete' === $aspect_type && is_array( $cached ) && $object_id > 0 ) {
+			// Remove the deleted activity from cache without re-fetching.
+			$strava_url = 'https://www.strava.com/activities/' . $object_id;
+			$cached     = array_values(
+				array_filter( $cached, static fn( $a ) => ( $a['stravaUrl'] ?? '' ) !== $strava_url )
+			);
+			wpgraphql_strava_cache_set( WPGRAPHQL_STRAVA_CACHE_KEY, $cached, WPGRAPHQL_STRAVA_CACHE_TTL );
+		} else {
+			// For create/update, clear cache so next request fetches fresh data.
+			wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
+		}
 
 		/**
-		 * Fires when a Strava webhook event triggers a cache clear.
+		 * Fires when a Strava webhook event is processed.
 		 *
 		 * @param string $aspect_type Event type (create, update, delete).
 		 * @param array<string, mixed> $body Full webhook payload.

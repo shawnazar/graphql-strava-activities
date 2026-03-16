@@ -63,6 +63,54 @@ define( 'WPGRAPHQL_STRAVA_CACHE_KEY', 'wpgraphql_strava_activities' );
 define( 'WPGRAPHQL_STRAVA_CACHE_TTL', 12 * HOUR_IN_SECONDS );
 
 /**
+ * Object cache group for this plugin.
+ *
+ * @var string
+ */
+define( 'WPGRAPHQL_STRAVA_CACHE_GROUP', 'wpgraphql_strava' );
+
+/**
+ * Get a cached value, using object cache when available.
+ *
+ * @param string $key Cache key.
+ * @return mixed Cached value or false.
+ */
+function wpgraphql_strava_cache_get( string $key ) {
+	if ( wp_using_ext_object_cache() ) {
+		return wp_cache_get( $key, WPGRAPHQL_STRAVA_CACHE_GROUP );
+	}
+	return get_transient( $key );
+}
+
+/**
+ * Set a cached value, using object cache when available.
+ *
+ * @param string $key   Cache key.
+ * @param mixed  $value Value to cache.
+ * @param int    $ttl   Time to live in seconds.
+ * @return bool True on success.
+ */
+function wpgraphql_strava_cache_set( string $key, $value, int $ttl = 0 ): bool {
+	if ( wp_using_ext_object_cache() ) {
+		return wp_cache_set( $key, $value, WPGRAPHQL_STRAVA_CACHE_GROUP, $ttl );
+	}
+	return set_transient( $key, $value, $ttl );
+}
+
+/**
+ * Delete a cached value.
+ *
+ * @param string $key Cache key.
+ * @return bool True on success.
+ */
+function wpgraphql_strava_cache_delete( string $key ): bool {
+	if ( wp_using_ext_object_cache() ) {
+		return wp_cache_delete( $key, WPGRAPHQL_STRAVA_CACHE_GROUP );
+	}
+	return delete_transient( $key );
+}
+
+/**
  * Get cached Strava activities, fetching fresh data when the cache is empty.
  *
  * Always requests the maximum from the API (200) and caches the full set.
@@ -72,7 +120,7 @@ define( 'WPGRAPHQL_STRAVA_CACHE_TTL', 12 * HOUR_IN_SECONDS );
  * @return array<int, array<string, mixed>> Processed activity data.
  */
 function wpgraphql_strava_get_cached_activities( int $count = 0 ): array {
-	$cached = get_transient( WPGRAPHQL_STRAVA_CACHE_KEY );
+	$cached = wpgraphql_strava_cache_get( WPGRAPHQL_STRAVA_CACHE_KEY );
 
 	if ( is_array( $cached ) && count( $cached ) > 0 ) {
 		return $count > 0 ? array_slice( $cached, 0, $count ) : $cached;
@@ -138,7 +186,7 @@ function wpgraphql_strava_get_cached_activities( int $count = 0 ): array {
 	 */
 	$ttl = (int) apply_filters( 'wpgraphql_strava_cache_ttl', WPGRAPHQL_STRAVA_CACHE_TTL );
 
-	set_transient( WPGRAPHQL_STRAVA_CACHE_KEY, $activities, $ttl );
+	wpgraphql_strava_cache_set( WPGRAPHQL_STRAVA_CACHE_KEY, $activities, $ttl );
 	update_option( 'wpgraphql_strava_last_sync', time() );
 
 	/**
@@ -231,6 +279,7 @@ function wpgraphql_strava_process_activities( array $raw_activities ): array {
 			'duration'       => wpgraphql_strava_format_duration( $moving_time ),
 			'date'           => $activity['start_date'] ?? '',
 			'svgMap'         => wpgraphql_strava_polyline_to_svg( $polyline ),
+			'elevationProfileSvg' => wpgraphql_strava_elevation_profile_svg( $polyline, isset( $activity['total_elevation_gain'] ) ? (float) $activity['total_elevation_gain'] : 0.0 ),
 			'stravaUrl'      => $strava_id ? 'https://www.strava.com/activities/' . $strava_id : '',
 			'type'           => sanitize_text_field( $type ),
 			'photoUrl'       => esc_url_raw( $photo_url ),
@@ -280,6 +329,6 @@ function wpgraphql_strava_format_duration( int $seconds ): string {
  * @return void
  */
 function wpgraphql_strava_refresh_cache(): void {
-	delete_transient( WPGRAPHQL_STRAVA_CACHE_KEY );
+	wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 	wpgraphql_strava_get_cached_activities();
 }

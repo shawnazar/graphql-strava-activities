@@ -43,6 +43,7 @@ includes/
 ├── cli.php                    # WP-CLI commands (sync, status)
 ├── privacy.php                # GDPR personal data exporter and eraser
 ├── webhook.php                # Strava webhook endpoint for real-time updates
+├── elementor-widget.php       # Elementor widget (loaded only when Elementor is active)
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 
@@ -84,7 +85,7 @@ that depend on them. The bootstrap file handles this.
 
 ## GraphQL Fields
 
-The `StravaActivity` type exposes 22 fields. All come from the Strava list endpoint
+The `StravaActivity` type exposes 23 fields. All come from the Strava list endpoint
 (no extra API calls needed):
 
 | Field | Type | Source |

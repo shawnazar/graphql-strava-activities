@@ -27,6 +27,8 @@ function wpgraphql_strava_register_shortcodes(): void {
 	add_shortcode( 'strava_map', 'wpgraphql_strava_shortcode_map' );
 	add_shortcode( 'strava_stats', 'wpgraphql_strava_shortcode_stats' );
 	add_shortcode( 'strava_latest', 'wpgraphql_strava_shortcode_latest' );
+	add_shortcode( 'strava_heatmap', 'wpgraphql_strava_shortcode_heatmap' );
+	add_shortcode( 'strava_year_review', 'wpgraphql_strava_shortcode_year_review' );
 }
 
 /**
@@ -267,6 +269,158 @@ function wpgraphql_strava_shortcode_latest( $atts ): string {
 	}
 
 	return wpgraphql_strava_render_shortcode_card( $activities[0] );
+}
+
+/**
+ * [strava_heatmap] — Render all routes overlaid on one SVG.
+ *
+ * @param array<string, string>|string $atts Shortcode attributes.
+ * @return string SVG markup.
+ */
+function wpgraphql_strava_shortcode_heatmap( $atts ): string {
+	$atts = shortcode_atts(
+		[
+			'width'  => '400',
+			'height' => '300',
+		],
+		$atts,
+		'strava_heatmap'
+	);
+
+	$activities = wpgraphql_strava_get_cached_activities( 0 );
+	$width      = max( 100, (int) $atts['width'] );
+	$height     = max( 100, (int) $atts['height'] );
+
+	if ( empty( $activities ) ) {
+		return '<p class="strava-empty">' . esc_html__( 'No activities found.', 'graphql-strava-activities' ) . '</p>';
+	}
+
+	// Collect all SVG maps and overlay them with reduced opacity.
+	$maps = [];
+	foreach ( $activities as $activity ) {
+		if ( ! empty( $activity['svgMap'] ) ) {
+			$maps[] = $activity['svgMap'];
+		}
+	}
+
+	if ( empty( $maps ) ) {
+		return '<p class="strava-empty">' . esc_html__( 'No route data available.', 'graphql-strava-activities' ) . '</p>';
+	}
+
+	$opacity = min( 1.0, max( 0.05, 1.0 / count( $maps ) * 3 ) );
+
+	$html = '<div class="strava-heatmap" style="position:relative;width:' . esc_attr( (string) $width ) . 'px;height:' . esc_attr( (string) $height ) . 'px;max-width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;">';
+	foreach ( $maps as $map ) {
+		$html .= '<div style="position:absolute;inset:0;opacity:' . esc_attr( (string) round( $opacity, 2 ) ) . ';">'
+			. wp_kses( $map, wpgraphql_strava_allowed_svg_tags() )
+			. '</div>';
+	}
+	$html .= '</div>';
+
+	return $html;
+}
+
+/**
+ * [strava_year_review] — Render year-in-review aggregate statistics.
+ *
+ * Attributes: year (int, defaults to current year).
+ *
+ * @param array<string, string>|string $atts Shortcode attributes.
+ * @return string HTML output.
+ */
+function wpgraphql_strava_shortcode_year_review( $atts ): string {
+	$atts = shortcode_atts(
+		[ 'year' => (string) wp_date( 'Y' ) ],
+		$atts,
+		'strava_year_review'
+	);
+
+	$year       = (int) $atts['year'];
+	$activities = wpgraphql_strava_get_cached_activities( 0 );
+
+	// Filter to requested year.
+	$year_activities = array_filter(
+		$activities,
+		static function ( array $a ) use ( $year ): bool {
+			$date = $a['date'] ?? '';
+			return ! empty( $date ) && (int) substr( $date, 0, 4 ) === $year;
+		}
+	);
+
+	if ( empty( $year_activities ) ) {
+		return '<p class="strava-empty">' . esc_html__( 'No activities found for this year.', 'graphql-strava-activities' ) . '</p>';
+	}
+
+	$total_distance   = 0.0;
+	$total_duration_s = 0;
+	$total_elevation  = 0.0;
+	$total_count      = count( $year_activities );
+	$unit             = '';
+	$types            = [];
+	$monthly          = array_fill( 1, 12, 0.0 );
+
+	foreach ( $year_activities as $a ) {
+		$total_distance  += (float) ( $a['distance'] ?? 0 );
+		$total_elevation += (float) ( $a['elevationGain'] ?? 0 );
+		$unit             = $a['unit'] ?? 'mi';
+
+		$type = $a['type'] ?? 'Other';
+		if ( ! isset( $types[ $type ] ) ) {
+			$types[ $type ] = 0;
+		}
+		++$types[ $type ];
+
+		$date = $a['date'] ?? '';
+		if ( ! empty( $date ) ) {
+			$month = (int) substr( $date, 5, 2 );
+			if ( $month >= 1 && $month <= 12 ) {
+				$monthly[ $month ] += (float) ( $a['distance'] ?? 0 );
+			}
+		}
+	}
+
+	// Build monthly bar chart SVG.
+	$max_monthly = max( $monthly );
+	$max_monthly = $max_monthly > 0 ? $max_monthly : 1;
+	$bar_width   = 20;
+	$chart_w     = 12 * ( $bar_width + 4 );
+	$chart_h     = 60;
+	$bars        = '';
+
+	for ( $m = 1; $m <= 12; $m++ ) {
+		$bar_h = ( $monthly[ $m ] / $max_monthly ) * $chart_h;
+		$x     = ( $m - 1 ) * ( $bar_width + 4 );
+		$y     = $chart_h - $bar_h;
+		$bars .= sprintf(
+			'<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="#0d9488" opacity="0.8"/>',
+			esc_attr( (string) $x ),
+			esc_attr( (string) round( $y, 1 ) ),
+			esc_attr( (string) $bar_width ),
+			esc_attr( (string) round( $bar_h, 1 ) )
+		);
+	}
+
+	$chart_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $chart_w . ' ' . $chart_h . '" width="' . $chart_w . '" height="' . $chart_h . '">' . $bars . '</svg>';
+
+	arsort( $types );
+
+	$html  = '<div class="strava-year-review" style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;font-family:sans-serif;">';
+	$html .= '<h3 style="margin-top:0;">' . esc_html( (string) $year ) . ' ' . esc_html__( 'Year in Review', 'graphql-strava-activities' ) . '</h3>';
+	$html .= '<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px;">';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Activities', 'graphql-strava-activities' ) . '</div><div style="font-size:24px;font-weight:700;">' . esc_html( (string) $total_count ) . '</div></div>';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Distance', 'graphql-strava-activities' ) . '</div><div style="font-size:24px;font-weight:700;">' . esc_html( number_format( $total_distance, 1 ) ) . ' <span style="font-size:14px;">' . esc_html( $unit ) . '</span></div></div>';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Elevation', 'graphql-strava-activities' ) . '</div><div style="font-size:24px;font-weight:700;">' . esc_html( number_format( $total_elevation, 0 ) ) . ' <span style="font-size:14px;">m</span></div></div>';
+	$html .= '</div>';
+	$html .= '<div style="margin-bottom:12px;">' . wp_kses( $chart_svg, wpgraphql_strava_allowed_svg_tags() ) . '</div>';
+
+	$parts = [];
+	foreach ( $types as $type_name => $type_count ) {
+		$parts[] = esc_html( $type_name ) . ': ' . esc_html( (string) $type_count );
+	}
+	$html .= '<div style="font-size:13px;color:#6b7280;">' . implode( ' &middot; ', $parts ) . '</div>';
+	$html .= '</div>';
+
+	return $html;
 }
 
 // ------------------------------------------------------------------

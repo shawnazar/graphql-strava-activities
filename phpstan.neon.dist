@@ -10,6 +10,7 @@ parameters:
         - vendor/
         - tests/
         - includes/cli.php
+        - includes/elementor-widget.php
     bootstrapFiles:
         - vendor/autoload.php
     stubFiles:
@@ -22,5 +23,6 @@ parameters:
         - '#PHPDoc tag @var does not specify variable name#'
         - '#Constant WPGRAPHQL_STRAVA_ENCRYPTION_KEY not found#'
         - '#Constant WPGRAPHQL_STRAVA_DIR not found#'
+        - '#Instantiated class WPGRAPHQL_Strava_Elementor_Widget not found#'
     scanFiles:
         - stubs/wpgraphql.php

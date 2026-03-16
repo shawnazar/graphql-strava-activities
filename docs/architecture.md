@@ -19,6 +19,7 @@ includes/
 ├── cli.php                    # WP-CLI commands (sync, status)
 ├── privacy.php                # GDPR personal data exporter and eraser
 ├── webhook.php                # Strava webhook endpoint for real-time updates
+├── elementor-widget.php       # Elementor widget (loaded only when Elementor is active)
 └── class-wpgraphql-strava-activities-list-table.php  # WP_List_Table for Activities page
 ```
 

@@ -58,7 +58,7 @@ You should see your recent activities with inline SVG route maps.
 
 ## Next Steps
 
-- [Activity Fields](fields.md) — full reference of all 22 queryable fields
+- [Activity Fields](fields.md) — full reference of all 23 queryable fields
 - [Admin Settings](settings.md) — configure sync frequency, SVG appearance, and display units
 - [SVG Route Maps](svg-maps.md) — customise route map appearance
 - [Shortcodes](shortcodes.md) — display activities on non-headless WordPress sites

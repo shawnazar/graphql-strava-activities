@@ -921,7 +921,7 @@ function wpgraphql_strava_render_admin_page(): void {
 	$has_token         = ! empty( wpgraphql_strava_get_option( 'wpgraphql_strava_access_token' ) );
 	$token_expires_at  = (int) get_option( 'wpgraphql_strava_token_expires_at', 0 );
 	$last_sync         = (int) get_option( 'wpgraphql_strava_last_sync', 0 );
-	$cached_activities = get_transient( WPGRAPHQL_STRAVA_CACHE_KEY );
+	$cached_activities = wpgraphql_strava_cache_get( WPGRAPHQL_STRAVA_CACHE_KEY );
 	$cached_count      = is_array( $cached_activities ) ? count( $cached_activities ) : 0;
 	?>
 	<div class="wrap">

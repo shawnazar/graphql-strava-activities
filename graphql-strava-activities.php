@@ -120,6 +120,17 @@ function wpgraphql_strava_init(): void {
 	if ( function_exists( 'register_block_type' ) ) {
 		register_block_type( WPGRAPHQL_STRAVA_DIR . 'blocks/strava-activities' );
 	}
+
+	// Elementor widget (only when Elementor is active).
+	if ( did_action( 'elementor/loaded' ) ) {
+		add_action(
+			'elementor/widgets/register',
+			static function ( $widgets_manager ) {
+				require_once WPGRAPHQL_STRAVA_DIR . 'includes/elementor-widget.php';
+				$widgets_manager->register( new \WPGRAPHQL_Strava_Elementor_Widget() );
+			}
+		);
+	}
 }
 
 add_action( 'plugins_loaded', 'wpgraphql_strava_init' );
@@ -224,7 +235,7 @@ function wpgraphql_strava_flush_on_route_toggle( $old_value, $new_value ): void 
 		return;
 	}
 
-	delete_transient( 'wpgraphql_strava_activities' );
+	wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 }
 
 add_action( 'update_option_wpgraphql_strava_include_no_route', 'wpgraphql_strava_flush_on_route_toggle', 10, 2 );
@@ -237,7 +248,7 @@ add_action( 'update_option_wpgraphql_strava_include_private', 'wpgraphql_strava_
  */
 function wpgraphql_strava_deactivate(): void {
 	wp_clear_scheduled_hook( 'wpgraphql_strava_cron_refresh' );
-	delete_transient( 'wpgraphql_strava_activities' );
+	wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 }
 
 register_deactivation_hook( __FILE__, 'wpgraphql_strava_deactivate' );

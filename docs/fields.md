@@ -1,6 +1,6 @@
 # Activity Fields
 
-The `StravaActivity` type exposes 22 fields. All data comes from the Strava list endpoint — no extra API calls needed per activity.
+The `StravaActivity` type exposes 23 fields. All data comes from the Strava list endpoint — no extra API calls needed per activity.
 
 ## Field Reference
 
@@ -14,6 +14,7 @@ The `StravaActivity` type exposes 22 fields. All data comes from the Strava list
 | `unit` | String | Distance unit — "mi" or "km" | Setting |
 | `speedUnit` | String | Speed unit — "mph" or "km/h" | Setting |
 | `svgMap` | String | Inline SVG route map markup | `map.summary_polyline` |
+| `elevationProfileSvg` | String | Inline SVG elevation profile chart | `map.summary_polyline` + `total_elevation_gain` |
 | `stravaUrl` | String | Link to the activity on Strava | Constructed from `id` |
 | `photoUrl` | String | Primary activity photo URL (nullable) | `photos.primary.urls` |
 | `elevationGain` | Float | Total elevation gain in metres | `total_elevation_gain` |

@@ -102,7 +102,7 @@ function wpgraphql_strava_export_personal_data( string $email_address, int $page
  * @return array<string, mixed> Erasure response.
  */
 function wpgraphql_strava_erase_personal_data( string $email_address, int $page = 1 ): array {
-	delete_transient( 'wpgraphql_strava_activities' );
+	wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 	delete_option( 'wpgraphql_strava_access_token' );
 	delete_option( 'wpgraphql_strava_refresh_token' );
 	delete_option( 'wpgraphql_strava_token_expires_at' );

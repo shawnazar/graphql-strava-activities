@@ -20,4 +20,11 @@ if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
     define( 'HOUR_IN_SECONDS', 3600 );
 }
 
+// Stub WordPress cache functions for testing.
+if ( ! function_exists( 'wp_using_ext_object_cache' ) ) {
+    function wp_using_ext_object_cache() {
+        return false;
+    }
+}
+
 require_once dirname( __DIR__ ) . '/vendor/autoload.php';

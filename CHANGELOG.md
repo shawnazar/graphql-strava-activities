@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wpgraphql_strava_activity_icon` filter for custom icon mapping
 - CSV export button on Activities admin page
 - WordPress multisite verified — per-site credentials and cron (no code changes needed)
+- Object cache adapter — uses Redis/Memcached via `wp_cache_*` when available, falls back to transients
+- Partial cache updates on webhook delete events (removes single activity without full re-sync)
+- `elevationProfileSvg` GraphQL field and SVG elevation profile generator
+- `[strava_heatmap]` shortcode — overlays all routes on one SVG
+- `[strava_year_review]` shortcode — yearly stats with monthly distance bar chart
+- Elementor widget for Strava activities (loads only when Elementor is active)
 
 ## [0.1.3] - 2026-03-16
 

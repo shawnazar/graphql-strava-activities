@@ -147,7 +147,7 @@ function wpgraphql_strava_handle_oauth_callback(): void {
 	}
 
 	// Trigger an immediate sync so the user sees activities right away.
-	delete_transient( 'wpgraphql_strava_activities' );
+	wpgraphql_strava_cache_delete( WPGRAPHQL_STRAVA_CACHE_KEY );
 	$activities = wpgraphql_strava_get_cached_activities( 1 );
 
 	if ( ! empty( $activities ) ) {
