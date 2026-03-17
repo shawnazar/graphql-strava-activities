@@ -29,6 +29,7 @@ function wpgraphql_strava_register_shortcodes(): void {
 	add_shortcode( 'strava_latest', 'wpgraphql_strava_shortcode_latest' );
 	add_shortcode( 'strava_heatmap', 'wpgraphql_strava_shortcode_heatmap' );
 	add_shortcode( 'strava_year_review', 'wpgraphql_strava_shortcode_year_review' );
+	add_shortcode( 'strava_trends', 'wpgraphql_strava_shortcode_trends' );
 }
 
 /**
@@ -418,6 +419,147 @@ function wpgraphql_strava_shortcode_year_review( $atts ): string {
 		$parts[] = esc_html( $type_name ) . ': ' . esc_html( (string) $type_count );
 	}
 	$html .= '<div style="font-size:13px;color:#6b7280;">' . implode( ' &middot; ', $parts ) . '</div>';
+	$html .= '</div>';
+
+	return $html;
+}
+
+/**
+ * [strava_trends] — Render weekly distance trend chart.
+ *
+ * Attributes: weeks (int, default 12), type (string, optional).
+ *
+ * @param array<string, string>|string $atts Shortcode attributes.
+ * @return string HTML output.
+ */
+function wpgraphql_strava_shortcode_trends( $atts ): string {
+	$atts = shortcode_atts(
+		[
+			'weeks' => '12',
+			'type'  => '',
+		],
+		$atts,
+		'strava_trends'
+	);
+
+	$weeks      = max( 4, min( 52, (int) $atts['weeks'] ) );
+	$activities = wpgraphql_strava_get_cached_activities( 0 );
+
+	if ( ! empty( $atts['type'] ) ) {
+		$type_filter = sanitize_text_field( $atts['type'] );
+		$activities  = array_values(
+			array_filter(
+				$activities,
+				static fn( array $a ): bool => ( $a['type'] ?? '' ) === $type_filter
+			)
+		);
+	}
+
+	if ( empty( $activities ) ) {
+		return '<p class="strava-empty">' . esc_html__( 'No activities found.', 'graphql-strava-activities' ) . '</p>';
+	}
+
+	$unit = $activities[0]['unit'] ?? 'mi';
+
+	// Build weekly buckets.
+	$now         = time();
+	$week_start  = (int) strtotime( 'monday this week', $now );
+	$weekly_data = [];
+
+	for ( $i = 0; $i < $weeks; $i++ ) {
+		$start              = $week_start - ( $i * 7 * DAY_IN_SECONDS );
+		$weekly_data[ $i ] = [
+			'start'    => $start,
+			'distance' => 0.0,
+			'count'    => 0,
+		];
+	}
+
+	foreach ( $activities as $activity ) {
+		$date = $activity['date'] ?? '';
+		if ( empty( $date ) ) {
+			continue;
+		}
+		$ts = strtotime( $date );
+		if ( false === $ts ) {
+			continue;
+		}
+
+		for ( $i = 0; $i < $weeks; $i++ ) {
+			$bucket_start = $weekly_data[ $i ]['start'];
+			$bucket_end   = $bucket_start + ( 7 * DAY_IN_SECONDS );
+			if ( $ts >= $bucket_start && $ts < $bucket_end ) {
+				$weekly_data[ $i ]['distance'] += (float) ( $activity['distance'] ?? 0 );
+				++$weekly_data[ $i ]['count'];
+				break;
+			}
+		}
+	}
+
+	// Reverse so oldest week is first.
+	$weekly_data = array_reverse( $weekly_data );
+
+	$max_distance = 0.0;
+	$total_dist   = 0.0;
+	$total_count  = 0;
+	foreach ( $weekly_data as $w ) {
+		$max_distance = max( $max_distance, $w['distance'] );
+		$total_dist  += $w['distance'];
+		$total_count += $w['count'];
+	}
+
+	if ( $max_distance <= 0 ) {
+		$max_distance = 1;
+	}
+
+	$avg_weekly = $total_dist / $weeks;
+
+	// Build SVG bar chart.
+	$bar_w   = 16;
+	$gap     = 4;
+	$chart_w = $weeks * ( $bar_w + $gap );
+	$chart_h = 80;
+	$bars    = '';
+
+	foreach ( $weekly_data as $idx => $w ) {
+		$bar_h = ( $w['distance'] / $max_distance ) * $chart_h;
+		$x     = $idx * ( $bar_w + $gap );
+		$y     = $chart_h - $bar_h;
+		$bars .= sprintf(
+			'<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="#0d9488" opacity="0.8"/>',
+			esc_attr( (string) $x ),
+			esc_attr( (string) round( $y, 1 ) ),
+			esc_attr( (string) $bar_w ),
+			esc_attr( (string) round( max( $bar_h, 1 ), 1 ) )
+		);
+	}
+
+	// Average line.
+	$avg_y = $chart_h - ( $avg_weekly / $max_distance ) * $chart_h;
+	$bars .= sprintf(
+		'<line x1="0" y1="%s" x2="%s" y2="%s" stroke="#FC5200" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>',
+		esc_attr( (string) round( $avg_y, 1 ) ),
+		esc_attr( (string) $chart_w ),
+		esc_attr( (string) round( $avg_y, 1 ) )
+	);
+
+	$chart_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $chart_w . ' ' . $chart_h . '" width="' . $chart_w . '" height="' . $chart_h . '" style="max-width:100%;">' . $bars . '</svg>';
+
+	$html  = '<div class="strava-trends" style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;font-family:sans-serif;">';
+	$html .= '<h3 style="margin-top:0;">' . sprintf(
+		/* translators: %d: Number of weeks */
+		esc_html__( 'Last %d Weeks', 'graphql-strava-activities' ),
+		$weeks
+	) . '</h3>';
+	$html .= '<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;">';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Activities', 'graphql-strava-activities' ) . '</div><div style="font-size:20px;font-weight:700;">' . esc_html( (string) $total_count ) . '</div></div>';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Total', 'graphql-strava-activities' ) . '</div><div style="font-size:20px;font-weight:700;">' . esc_html( number_format( $total_dist, 1 ) ) . ' ' . esc_html( $unit ) . '</div></div>';
+	$html .= '<div><div style="font-size:12px;color:#9ca3af;text-transform:uppercase;">' . esc_html__( 'Avg/Week', 'graphql-strava-activities' ) . '</div><div style="font-size:20px;font-weight:700;">' . esc_html( number_format( $avg_weekly, 1 ) ) . ' ' . esc_html( $unit ) . '</div></div>';
+	$html .= '</div>';
+	$html .= '<div>' . wp_kses( $chart_svg, wpgraphql_strava_allowed_svg_tags() ) . '</div>';
+	$html .= '<div style="font-size:11px;color:#9ca3af;margin-top:4px;">';
+	$html .= esc_html__( 'Dashed line = weekly average', 'graphql-strava-activities' );
+	$html .= '</div>';
 	$html .= '</div>';
 
 	return $html;

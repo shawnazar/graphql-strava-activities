@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `[strava_heatmap]` shortcode — overlays all routes on one SVG
 - `[strava_year_review]` shortcode — yearly stats with monthly distance bar chart
 - Elementor widget for Strava activities (loads only when Elementor is active)
+- `[strava_trends]` shortcode — weekly distance trend chart with rolling average line
+- React component examples (`examples/react/`) — StravaActivities, StravaMap, StravaStats
+- Next.js starter example (`examples/nextjs/`) — App Router page with ISR
+- Astro example (`examples/astro/`) — static site generation, zero client JS
 
 ## [0.1.3] - 2026-03-16
 
