@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-03-17
+
 ### Added
 - `.pot` file generation via `composer make-pot` for internationalization
 - `wp strava sync` and `wp strava status` WP-CLI commands
