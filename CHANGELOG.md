@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - React component examples (`examples/react/`) — StravaActivities, StravaMap, StravaStats
 - Next.js starter example (`examples/nextjs/`) — App Router page with ISR
 - Astro example (`examples/astro/`) — static site generation, zero client JS
+- Multi-athlete support: `userId` argument on GraphQL and REST API, per-user credentials via user meta
+- `wpgraphql_strava_get_user_activities()` and `wpgraphql_strava_get_user_option()` functions
+- GraphQL subscription infrastructure: `stravaLastEvent` query field, `StravaEvent` type, event publishing on webhooks
+- `wpgraphql_strava_subscription_event` action hook for external subscription systems
 
 ## [0.1.3] - 2026-03-16
 

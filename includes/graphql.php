@@ -144,14 +144,20 @@ function wpgraphql_strava_register_types(): void {
 					'type'        => 'String',
 					'description' => __( 'Filter by activity type (e.g. "Ride", "Run").', 'graphql-strava-activities' ),
 				],
+				'userId' => [
+					'type'         => 'Int',
+					'description'  => __( 'WordPress user ID for multi-athlete support (0 = global default).', 'graphql-strava-activities' ),
+					'defaultValue' => 0,
+				],
 			],
 			'resolve'     => static function ( $root, array $args ): array {
 				// Validate and clamp arguments.
-				$count  = min( max( (int) ( $args['first'] ?? 0 ), 0 ), 200 );
-				$offset = max( (int) ( $args['offset'] ?? 0 ), 0 );
+				$count   = min( max( (int) ( $args['first'] ?? 0 ), 0 ), 200 );
+				$offset  = max( (int) ( $args['offset'] ?? 0 ), 0 );
+				$user_id = max( (int) ( $args['userId'] ?? 0 ), 0 );
 
-				// Fetch all cached activities (filtering/slicing done below).
-				$activities = wpgraphql_strava_get_cached_activities( 0 );
+				// Fetch activities (user-specific or global).
+				$activities = wpgraphql_strava_get_user_activities( 0, $user_id );
 
 				// Type filter.
 				$type_filter = sanitize_text_field( $args['type'] ?? '' );
@@ -171,6 +177,41 @@ function wpgraphql_strava_register_types(): void {
 
 				return $activities;
 			},
+		]
+	);
+
+	// Subscription-ready event polling field.
+	register_graphql_field(
+		'RootQuery',
+		'stravaLastEvent',
+		[
+			'type'        => 'StravaEvent',
+			'description' => __( 'Latest Strava webhook event (for polling-based subscriptions).', 'graphql-strava-activities' ),
+			'resolve'     => static function (): ?array {
+				$event = get_transient( 'wpgraphql_strava_last_event' );
+				return is_array( $event ) ? $event : null;
+			},
+		]
+	);
+
+	register_graphql_object_type(
+		'StravaEvent',
+		[
+			'description' => __( 'A Strava webhook event.', 'graphql-strava-activities' ),
+			'fields'      => [
+				'type'       => [
+					'type'        => 'String',
+					'description' => __( 'Event type: create, update, or delete.', 'graphql-strava-activities' ),
+				],
+				'activityId' => [
+					'type'        => 'Int',
+					'description' => __( 'Strava activity ID.', 'graphql-strava-activities' ),
+				],
+				'timestamp'  => [
+					'type'        => 'Int',
+					'description' => __( 'Unix timestamp of the event.', 'graphql-strava-activities' ),
+				],
+			],
 		]
 	);
 }
