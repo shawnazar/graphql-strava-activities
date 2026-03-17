@@ -43,10 +43,16 @@ function wpgraphql_strava_register_rest_routes(): void {
 					'minimum'           => 0,
 					'sanitize_callback' => 'absint',
 				],
-				'type'   => [
+				'type'    => [
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
+				],
+				'user_id' => [
+					'type'              => 'integer',
+					'default'           => 0,
+					'minimum'           => 0,
+					'sanitize_callback' => 'absint',
 				],
 			],
 		]
@@ -63,7 +69,8 @@ function wpgraphql_strava_rest_activities( \WP_REST_Request $request ): \WP_REST
 	$count      = (int) $request->get_param( 'count' );
 	$offset     = (int) $request->get_param( 'offset' );
 	$type       = (string) $request->get_param( 'type' );
-	$activities = wpgraphql_strava_get_cached_activities( 0 );
+	$user_id    = (int) $request->get_param( 'user_id' );
+	$activities = wpgraphql_strava_get_user_activities( 0, $user_id );
 
 	// Type filter.
 	if ( ! empty( $type ) ) {

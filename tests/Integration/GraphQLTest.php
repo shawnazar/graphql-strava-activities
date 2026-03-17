@@ -32,39 +32,18 @@ class GraphQLTest extends TestCase {
 	private array $options = [];
 
 	/**
-	 * Captured config for register_graphql_object_type.
+	 * All captured object types by name.
 	 *
-	 * @var array<string, mixed>|null
+	 * @var array<string, array<string, mixed>>
 	 */
-	private ?array $captured_object_type_config = null;
+	private array $captured_types = [];
 
 	/**
-	 * Captured name for register_graphql_object_type.
+	 * All captured fields by "type.field" key.
 	 *
-	 * @var string|null
+	 * @var array<string, array<string, mixed>>
 	 */
-	private ?string $captured_object_type_name = null;
-
-	/**
-	 * Captured arguments for register_graphql_field.
-	 *
-	 * @var array<string, mixed>|null
-	 */
-	private ?array $captured_field_config = null;
-
-	/**
-	 * Captured type name for register_graphql_field.
-	 *
-	 * @var string|null
-	 */
-	private ?string $captured_field_type_name = null;
-
-	/**
-	 * Captured field name for register_graphql_field.
-	 *
-	 * @var string|null
-	 */
-	private ?string $captured_field_name = null;
+	private array $captured_fields = [];
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -78,11 +57,8 @@ class GraphQLTest extends TestCase {
 			'wpgraphql_strava_svg_stroke_width' => 2.5,
 		];
 
-		$this->captured_object_type_config = null;
-		$this->captured_object_type_name   = null;
-		$this->captured_field_config       = null;
-		$this->captured_field_type_name    = null;
-		$this->captured_field_name         = null;
+		$this->captured_types  = [];
+		$this->captured_fields = [];
 
 		Functions\stubTranslationFunctions();
 
@@ -145,16 +121,13 @@ class GraphQLTest extends TestCase {
 
 		Functions\when( 'register_graphql_object_type' )->alias(
 			function ( string $type_name, array $config ): void {
-				$this->captured_object_type_name   = $type_name;
-				$this->captured_object_type_config = $config;
+				$this->captured_types[ $type_name ] = $config;
 			}
 		);
 
 		Functions\when( 'register_graphql_field' )->alias(
 			function ( string $type_name, string $field_name, array $config ): void {
-				$this->captured_field_type_name = $type_name;
-				$this->captured_field_name      = $field_name;
-				$this->captured_field_config    = $config;
+				$this->captured_fields[ $type_name . '.' . $field_name ] = $config;
 			}
 		);
 
@@ -184,9 +157,10 @@ class GraphQLTest extends TestCase {
 	 */
 	private function register_and_get_resolver(): callable {
 		wpgraphql_strava_register_types();
-		$this->assertNotNull( $this->captured_field_config, 'register_graphql_field was not called.' );
-		$this->assertArrayHasKey( 'resolve', $this->captured_field_config );
-		return $this->captured_field_config['resolve'];
+		$key = 'RootQuery.stravaActivities';
+		$this->assertArrayHasKey( $key, $this->captured_fields, 'register_graphql_field was not called for stravaActivities.' );
+		$this->assertArrayHasKey( 'resolve', $this->captured_fields[ $key ] );
+		return $this->captured_fields[ $key ]['resolve'];
 	}
 
 	/**
@@ -294,11 +268,12 @@ class GraphQLTest extends TestCase {
 	public function test_register_types_registers_strava_activity_type(): void {
 		wpgraphql_strava_register_types();
 
-		$this->assertSame( 'StravaActivity', $this->captured_object_type_name );
-		$this->assertArrayHasKey( 'description', $this->captured_object_type_config );
-		$this->assertArrayHasKey( 'fields', $this->captured_object_type_config );
+		$this->assertArrayHasKey( 'StravaActivity', $this->captured_types );
+		$config = $this->captured_types['StravaActivity'];
+		$this->assertArrayHasKey( 'description', $config );
+		$this->assertArrayHasKey( 'fields', $config );
 
-		$fields = $this->captured_object_type_config['fields'];
+		$fields = $config['fields'];
 
 		$expected_fields = [
 			'title',
@@ -338,14 +313,16 @@ class GraphQLTest extends TestCase {
 	public function test_register_types_registers_root_query_field(): void {
 		wpgraphql_strava_register_types();
 
-		$this->assertSame( 'RootQuery', $this->captured_field_type_name );
-		$this->assertSame( 'stravaActivities', $this->captured_field_name );
-		$this->assertArrayHasKey( 'type', $this->captured_field_config );
-		$this->assertArrayHasKey( 'description', $this->captured_field_config );
-		$this->assertArrayHasKey( 'args', $this->captured_field_config );
-		$this->assertArrayHasKey( 'resolve', $this->captured_field_config );
-		$this->assertArrayHasKey( 'first', $this->captured_field_config['args'] );
-		$this->assertArrayHasKey( 'type', $this->captured_field_config['args'] );
+		$key = 'RootQuery.stravaActivities';
+		$this->assertArrayHasKey( $key, $this->captured_fields );
+		$config = $this->captured_fields[ $key ];
+		$this->assertArrayHasKey( 'type', $config );
+		$this->assertArrayHasKey( 'description', $config );
+		$this->assertArrayHasKey( 'args', $config );
+		$this->assertArrayHasKey( 'resolve', $config );
+		$this->assertArrayHasKey( 'first', $config['args'] );
+		$this->assertArrayHasKey( 'type', $config['args'] );
+		$this->assertArrayHasKey( 'userId', $config['args'] );
 	}
 
 	public function test_resolver_returns_all_cached_activities(): void {

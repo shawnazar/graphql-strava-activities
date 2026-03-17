@@ -111,6 +111,49 @@ function wpgraphql_strava_cache_delete( string $key ): bool {
 }
 
 /**
+ * Get cached Strava activities for a specific user.
+ *
+ * When $user_id is 0 (default), uses the global plugin credentials.
+ * When a user ID is provided, uses that user's per-user credentials.
+ *
+ * @param int $count   Number of activities to return (0 = all cached).
+ * @param int $user_id WordPress user ID (0 = global/default).
+ * @return array<int, array<string, mixed>> Processed activity data.
+ */
+function wpgraphql_strava_get_user_activities( int $count = 0, int $user_id = 0 ): array {
+	if ( 0 === $user_id ) {
+		return wpgraphql_strava_get_cached_activities( $count );
+	}
+
+	$cache_key = WPGRAPHQL_STRAVA_CACHE_KEY . '_user_' . $user_id;
+	$cached    = wpgraphql_strava_cache_get( $cache_key );
+
+	if ( is_array( $cached ) && count( $cached ) > 0 ) {
+		return $count > 0 ? array_slice( $cached, 0, $count ) : $cached;
+	}
+
+	$access_token = wpgraphql_strava_get_user_option( $user_id, 'wpgraphql_strava_access_token' );
+
+	if ( empty( $access_token ) ) {
+		return [];
+	}
+
+	$fetch_count    = min( (int) apply_filters( 'wpgraphql_strava_activities_to_fetch', 200 ), 200 );
+	$raw_activities = wpgraphql_strava_fetch_activities_with_token( $access_token, $fetch_count );
+
+	if ( empty( $raw_activities ) ) {
+		return [];
+	}
+
+	$activities = wpgraphql_strava_process_activities( $raw_activities );
+	$ttl        = (int) apply_filters( 'wpgraphql_strava_cache_ttl', WPGRAPHQL_STRAVA_CACHE_TTL );
+
+	wpgraphql_strava_cache_set( $cache_key, $activities, $ttl );
+
+	return $count > 0 ? array_slice( $activities, 0, $count ) : $activities;
+}
+
+/**
  * Get cached Strava activities, fetching fresh data when the cache is empty.
  *
  * Always requests the maximum from the API (200) and caches the full set.

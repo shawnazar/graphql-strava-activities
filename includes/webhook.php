@@ -119,8 +119,44 @@ function wpgraphql_strava_webhook_event( \WP_REST_Request $request ): \WP_REST_R
 		 * @param array<string, mixed> $body Full webhook payload.
 		 */
 		do_action( 'wpgraphql_strava_webhook_event', $aspect_type, $body );
+
+		// Publish event for GraphQL subscription consumers.
+		wpgraphql_strava_publish_subscription_event( $aspect_type, $object_id );
 	}
 
 	// Strava requires a 200 response within 2 seconds.
 	return new \WP_REST_Response( [ 'status' => 'ok' ], 200 );
+}
+
+/**
+ * Publish a subscription event for GraphQL consumers.
+ *
+ * Stores the latest activity event in a transient so subscription
+ * resolvers or polling clients can detect changes. When WPGraphQL
+ * adds native subscription support, this can be extended to push
+ * events directly.
+ *
+ * @param string $event_type create, update, or delete.
+ * @param int    $activity_id Strava activity ID.
+ * @return void
+ */
+function wpgraphql_strava_publish_subscription_event( string $event_type, int $activity_id ): void {
+	$event = [
+		'type'        => $event_type,
+		'activityId'  => $activity_id,
+		'timestamp'   => time(),
+	];
+
+	set_transient( 'wpgraphql_strava_last_event', $event, HOUR_IN_SECONDS );
+
+	/**
+	 * Fires when a subscription event is published.
+	 *
+	 * Developers can hook into this to push events to external
+	 * subscription systems (e.g. Pusher, Mercure, or a custom
+	 * WebSocket server).
+	 *
+	 * @param array<string, mixed> $event Event data.
+	 */
+	do_action( 'wpgraphql_strava_subscription_event', $event );
 }

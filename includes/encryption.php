@@ -162,3 +162,43 @@ function wpgraphql_strava_update_option( string $option, string $value ): bool {
 
 	return update_option( $option, $value );
 }
+
+/**
+ * Get a sensitive user meta value, decrypting if necessary.
+ *
+ * Used for multi-athlete support where each user has their own credentials.
+ *
+ * @param int    $user_id User ID.
+ * @param string $key     Meta key (without user prefix).
+ * @param string $default Default value.
+ * @return string Decrypted value.
+ */
+function wpgraphql_strava_get_user_option( int $user_id, string $key, string $default = '' ): string {
+	$value = get_user_meta( $user_id, $key, true );
+
+	if ( ! is_string( $value ) || empty( $value ) ) {
+		return $default;
+	}
+
+	if ( in_array( $key, WPGRAPHQL_STRAVA_ENCRYPTED_OPTIONS, true ) ) {
+		return wpgraphql_strava_decrypt( $value );
+	}
+
+	return $value;
+}
+
+/**
+ * Save a sensitive user meta value, encrypting if configured.
+ *
+ * @param int    $user_id User ID.
+ * @param string $key     Meta key.
+ * @param string $value   Plain-text value.
+ * @return bool True on success.
+ */
+function wpgraphql_strava_update_user_option( int $user_id, string $key, string $value ): bool {
+	if ( in_array( $key, WPGRAPHQL_STRAVA_ENCRYPTED_OPTIONS, true ) ) {
+		$value = wpgraphql_strava_encrypt( $value );
+	}
+
+	return (bool) update_user_meta( $user_id, $key, $value );
+}
