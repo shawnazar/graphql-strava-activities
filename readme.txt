@@ -51,6 +51,7 @@ GraphQL Strava Activities brings your Strava activities into your headless WordP
         unit
         speedUnit
         svgMap
+        elevationProfileSvg
         stravaUrl
         photoUrl
         elevationGain

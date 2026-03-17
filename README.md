@@ -75,6 +75,7 @@ Activate in WordPress, then visit **Strava** in the admin menu.
     unit
     speedUnit
     svgMap
+    elevationProfileSvg
     stravaUrl
     photoUrl
     elevationGain
