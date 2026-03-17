@@ -97,6 +97,7 @@ The `StravaActivity` type exposes 23 fields. All come from the Strava list endpo
 | type | String | `type` |
 | unit | String | Setting |
 | svgMap | String | `map.summary_polyline` (rendered) |
+| elevationProfileSvg | String | Elevation profile SVG chart |
 | stravaUrl | String | `id` (constructed URL) |
 | photoUrl | String | `photos.primary.urls` |
 | elevationGain | Float | `total_elevation_gain` (metres) |
