@@ -12,7 +12,7 @@ Compatible with Strava — a WordPress plugin that extends [WPGraphQL](https://w
 
 ## Features
 
-- **GraphQL API** — Query Strava activities with filtering, pagination (`offset`), and 22 fields
+- **GraphQL API** — Query Strava activities with filtering, pagination (`offset`), and 23 fields
 - **REST API** — `GET /wp-json/wpgraphql-strava/v1/activities` for non-GraphQL frontends
 - **SVG Route Maps** — Server-rendered inline SVG from Strava polyline data
 - **One-Click OAuth** — "Connect with Strava" button handles token exchange automatically
@@ -26,6 +26,12 @@ Compatible with Strava — a WordPress plugin that extends [WPGraphQL](https://w
 - **Dark Mode** — SVG maps adapt to system dark mode preference automatically
 - **GDPR Compliance** — Personal data export and erasure hooks
 - **CSV Export** — Download cached activities from the admin page
+- **Elevation Profile** — SVG elevation chart alongside route maps
+- **Heatmap** — All routes overlaid on one SVG
+- **Year in Review** — Yearly aggregate stats with monthly chart
+- **Training Trends** — Weekly distance chart with rolling average
+- **Elementor Widget** — Native Elementor integration
+- **Multi-Athlete** — Per-user Strava credentials via `userId` parameter
 - **Extensible** — Filters for cache TTL, SVG appearance, activity types, sync hooks, and more
 
 ## Requirements
@@ -120,6 +126,9 @@ For non-headless WordPress sites — use in posts and pages:
 [strava_map index="0"]                       — SVG route map only
 [strava_stats]                               — Aggregate stats
 [strava_latest type="Run"]                   — Most recent activity
+[strava_heatmap width="400" height="300"]    — All routes overlaid
+[strava_year_review year="2026"]             — Yearly stats
+[strava_trends weeks="12" type="Run"]        — Weekly distance chart
 ```
 
 ## Credential Encryption (Optional)

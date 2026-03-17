@@ -122,6 +122,9 @@ The `StravaActivity` type exposes 23 fields. All come from the Strava list endpo
 | `[strava_map]` | `index`, `width`, `height`, `color` | SVG route map only |
 | `[strava_stats]` | — | Aggregate stats |
 | `[strava_latest]` | `type` | Most recent activity |
+| `[strava_heatmap]` | `width`, `height` | All routes overlaid on one SVG |
+| `[strava_year_review]` | `year` | Yearly stats with monthly chart |
+| `[strava_trends]` | `weeks`, `type` | Weekly distance trend chart |
 
 ## Security Rules
 

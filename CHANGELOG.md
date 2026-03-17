@@ -33,6 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wpgraphql_strava_get_user_activities()` and `wpgraphql_strava_get_user_option()` functions
 - GraphQL subscription infrastructure: `stravaLastEvent` query field, `StravaEvent` type, event publishing on webhooks
 - `wpgraphql_strava_subscription_event` action hook for external subscription systems
+- Integration tests for webhook handler and privacy hooks
+
+### Fixed
+- CSV export filename uses RFC 5987 encoding for cross-browser compatibility
+- CSV export error handling shows wp_die message instead of silent return
+- Removed duplicate "Header row" comment in CSV export
+- Heatmap SVG wrapper has `role="img"` and `aria-label` for accessibility
+- README.md field count corrected to 23
+- CLAUDE.md shortcodes table updated with 3 new shortcodes (heatmap, year_review, trends)
+- README.md updated with all new features (elevation profile, heatmap, year review, trends, Elementor, multi-athlete)
 
 ## [0.1.3] - 2026-03-16
 

@@ -310,7 +310,7 @@ function wpgraphql_strava_shortcode_heatmap( $atts ): string {
 
 	$opacity = min( 1.0, max( 0.05, 1.0 / count( $maps ) * 3 ) );
 
-	$html = '<div class="strava-heatmap" style="position:relative;width:' . esc_attr( (string) $width ) . 'px;height:' . esc_attr( (string) $height ) . 'px;max-width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;">';
+	$html = '<div class="strava-heatmap" role="img" aria-label="' . esc_attr__( 'Activity route heatmap', 'graphql-strava-activities' ) . '" style="position:relative;width:' . esc_attr( (string) $width ) . 'px;height:' . esc_attr( (string) $height ) . 'px;max-width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;">';
 	foreach ( $maps as $map ) {
 		$html .= '<div style="position:absolute;inset:0;opacity:' . esc_attr( (string) round( $opacity, 2 ) ) . ';">'
 			. wp_kses( $map, wpgraphql_strava_allowed_svg_tags() )

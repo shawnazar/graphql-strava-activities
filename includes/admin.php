@@ -41,16 +41,15 @@ function wpgraphql_strava_handle_csv_export(): void {
 	$filename = 'strava-activities-' . wp_date( 'Y-m-d' ) . '.csv';
 
 	header( 'Content-Type: text/csv; charset=utf-8' );
-	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( "Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode( $filename ) );
 	header( 'Pragma: no-cache' );
 	header( 'Expires: 0' );
 
 	$output = fopen( 'php://output', 'w' );
 	if ( false === $output ) {
-		return;
+		wp_die( esc_html__( 'Failed to open output stream for CSV export.', 'graphql-strava-activities' ) );
 	}
 
-	// Header row.
 	// Header row.
 	$headers = [ 'Title', 'Type', 'Distance', 'Unit', 'Duration', 'Date', 'Elevation Gain', 'Avg Speed', 'Max Speed', 'Speed Unit', 'Avg HR', 'Max HR', 'Calories', 'Kudos', 'Comments', 'City', 'Country', 'Private', 'Strava URL' ];
 	fputcsv( $output, $headers );
