@@ -41,7 +41,7 @@ jobs:
           git archive --format=zip --prefix="graphql-strava-activities/" HEAD -o "graphql-strava-activities-${TAG}.zip"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body: ${{ steps.notes.outputs.body }}
           files: graphql-strava-activities-*.zip
